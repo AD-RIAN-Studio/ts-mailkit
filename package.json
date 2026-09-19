@@ -1,0 +1,54 @@
+{
+  "name": "ts-mailkit",
+  "version": "0.1.0",
+  "description": "Strictly typed, modular, and composable email composition and dispatch library for TypeScript and modern edge runtimes.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "packageManager": "pnpm@11.22.0",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run test/unit",
+    "test:unit": "vitest run test/unit",
+    "test:watch": "vitest test/unit",
+    "prepublishOnly": "pnpm run build && pnpm run test:unit"
+  },
+  "keywords": [
+    "email",
+    "mailer",
+    "zeptomail",
+    "zoho-mail",
+    "typescript",
+    "dto",
+    "transactional-email",
+    "edge",
+    "workerd"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.9.3",
+    "vitest": "^3.0.7"
+  }
+}

@@ -18,6 +18,14 @@
     "access": "public"
   },
   "packageManager": "pnpm@11.22.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AD-RIAN-Studio/ts-mailkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AD-RIAN-Studio/ts-mailkit/issues"
+  },
+  "homepage": "https://github.com/AD-RIAN-Studio/ts-mailkit#readme",
   "files": [
     "dist",
     "README.md"
@@ -42,7 +50,7 @@
     "edge",
     "workerd"
   ],
-  "author": "",
+  "author": "AD-RIAN Studio",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^26.1.1",

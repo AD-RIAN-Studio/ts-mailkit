@@ -52,7 +52,11 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 ## Code & Migration Conventions
 
-- **Backward-Compatible Overloads**: `MailKit.send` must support both the modern options object (`mailer.send({ to, template })`) and the legacy positional signature (`mailer.send(to, template, toName)`).
-- **Aliases**: Maintain `export const EmailService = MailKit` and `export type EmailTemplateDto = BaseEmailDto` for drop-in migration compatibility.
+- **Deprecated Migration Bridges (Scheduled for removal in v1.0.0)**:
+  - Positional overload `mailer.send(to, template, toName)` is deprecated in favor of `mailer.send({ to, template, ... })`.
+  - `sendEmail(...)` on `ZeptoMailSender` is deprecated in favor of `send(options: SendMailOptions)`.
+  - `sendSimpleMessage(...)` and `buildPlainTextMessage(...)` on `MailKit` are deprecated in favor of `sendRaw(...)` and `render(...)`.
+  - `EmailService` alias is deprecated in favor of `MailKit`.
+  - `BaseEmailDto` type alias is deprecated in favor of `EmailTemplateDto`.
 - **Reference Data**: `source-data/` is gitignored historical reference data; never import from or write to `source-data/`.
 - **Commits**: Follow Conventional Commits (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`, `test: ...`).

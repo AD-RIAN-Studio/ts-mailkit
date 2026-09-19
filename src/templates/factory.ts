@@ -1,4 +1,4 @@
-import type { BaseEmailDto, EmailTemplateDto } from './dto/index.js';
+import type { EmailTemplateDto } from './dto/index.js';
 import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
 
 export interface BrandingConfig {

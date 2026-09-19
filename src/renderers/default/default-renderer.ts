@@ -1,4 +1,4 @@
-import type { BaseEmailDto } from '../../templates/dto/index.js';
+import type { EmailTemplateDto } from '../../templates/dto/index.js';
 import type { IEmailRenderer, RenderedEmail } from '../renderer.interface.js';
 import { htmlToPlainText } from '../utils/html-to-plaintext.js';
 
@@ -25,7 +25,7 @@ export interface DefaultRendererOptions {
 /**
  * Builds a plain-text fallback string from an email DTO.
  */
-export function buildPlainText(dto: BaseEmailDto): string {
+export function buildPlainText(dto: EmailTemplateDto): string {
   if (dto.noHtmlMessage) {
     return dto.noHtmlMessage;
   }
@@ -63,7 +63,7 @@ export function buildPlainText(dto: BaseEmailDto): string {
 /**
  * Builds a responsive, styled HTML email document from an email DTO.
  */
-export function buildHtml(dto: BaseEmailDto, options: DefaultRendererOptions = {}): string {
+export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions = {}): string {
   const primaryColor = options.primaryColor || '#4f46e5';
   const fontFamily =
     options.fontFamily ||
@@ -142,7 +142,7 @@ export class DefaultEmailRenderer implements IEmailRenderer {
     this.options = options;
   }
 
-  render(dto: BaseEmailDto): RenderedEmail {
+  render(dto: EmailTemplateDto): RenderedEmail {
     return {
       html: buildHtml(dto, this.options),
       text: buildPlainText(dto),

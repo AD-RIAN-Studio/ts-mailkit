@@ -1,7 +1,7 @@
 import type { IEmailSender } from '../transports/sender.interface.js';
 import type { IEmailRenderer, RenderedEmail } from '../renderers/renderer.interface.js';
 import { DefaultEmailRenderer, buildPlainText } from '../renderers/default/default-renderer.js';
-import type { BaseEmailDto } from '../templates/dto/index.js';
+import type { EmailTemplateDto } from '../templates/dto/index.js';
 import {
   normalizeRecipient,
   normalizeRecipients,
@@ -19,7 +19,7 @@ export interface SendTemplateOptions {
   /**
    * Templated email DTO to render and send.
    */
-  template: BaseEmailDto;
+  template: EmailTemplateDto;
   /**
    * Optional recipient display name (used when `to` is a plain string).
    */
@@ -117,14 +117,15 @@ export class MailKit {
   /**
    * Renders an email DTO to HTML and plain text without dispatching.
    */
-  async render(template: BaseEmailDto): Promise<RenderedEmail> {
+  async render(template: EmailTemplateDto): Promise<RenderedEmail> {
     return await this.renderer.render(template);
   }
 
   /**
    * Returns the plain-text fallback for an email DTO without sending.
+   * @deprecated Use `mailer.render(template)` or `buildPlainText(template)` instead. This method will be removed in v1.0.0.
    */
-  buildPlainTextMessage(template: BaseEmailDto): string {
+  buildPlainTextMessage(template: EmailTemplateDto): string {
     return template.noHtmlMessage ?? buildPlainText(template);
   }
 
@@ -136,10 +137,13 @@ export class MailKit {
    *   `mailer.send('user@example.com', myDto, 'User Name')`
    */
   async send(options: SendTemplateOptions): Promise<SendResult>;
-  async send(to: string, template: BaseEmailDto, toName?: string): Promise<SendResult>;
+  /**
+   * @deprecated Use the options object signature `mailer.send({ to, template, ... })` instead. Positional signature will be removed in v1.0.0.
+   */
+  async send(to: string, template: EmailTemplateDto, toName?: string): Promise<SendResult>;
   async send(
     optionsOrTo: SendTemplateOptions | string,
-    maybeTemplate?: BaseEmailDto,
+    maybeTemplate?: EmailTemplateDto,
     maybeToName?: string
   ): Promise<SendResult> {
     let opts: SendTemplateOptions;
@@ -218,6 +222,7 @@ export class MailKit {
   /**
    * Sends a raw plain-text email with basic HTML pre-formatting.
    * Useful for plain notifications, alerts, or simple text messages.
+   * @deprecated Use `mailer.sendRaw({ to, subject, text, html })` instead. This method will be removed in v1.0.0.
    */
   async sendSimpleMessage(
     to: string,
@@ -237,8 +242,12 @@ export class MailKit {
 
 /**
  * Drop-in alias for MailKit to maintain compatibility with existing EmailService code.
+ * @deprecated Use `MailKit` instead. This alias will be removed in v1.0.0.
  */
 export const EmailService = MailKit;
+/**
+ * @deprecated Use `MailKit` instead. This alias will be removed in v1.0.0.
+ */
 export type EmailService = MailKit;
 
 /**

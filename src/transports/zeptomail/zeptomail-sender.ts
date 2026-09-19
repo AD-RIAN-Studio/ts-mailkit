@@ -193,6 +193,7 @@ export class ZeptoMailSender implements IEmailSender {
   /**
    * Backward-compatible helper method matching legacy signature:
    * `sendEmail(to, htmlBody, subject, toName?, plaintextBody?, fromName?)`
+   * @deprecated Use `send({ to, subject, html, text, ... })` instead. This method will be removed in v1.0.0.
    */
   async sendEmail(
     to: string,

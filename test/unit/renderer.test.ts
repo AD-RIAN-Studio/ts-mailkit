@@ -5,7 +5,7 @@ import {
   buildPlainText,
 } from '../../src/renderers/default/default-renderer.js';
 import { htmlToPlainText, decodeHtmlEntities } from '../../src/renderers/utils/html-to-plaintext.js';
-import type { BaseEmailDto } from '../../src/templates/dto/index.js';
+import type { EmailTemplateDto, BaseEmailDto } from '../../src/templates/dto/index.js';
 
 describe('Renderers & Utilities', () => {
   describe('htmlToPlainText', () => {
@@ -25,7 +25,7 @@ describe('Renderers & Utilities', () => {
   });
 
   describe('buildHtml and DefaultEmailRenderer', () => {
-    const sampleDto: BaseEmailDto = {
+    const sampleDto: EmailTemplateDto = {
       subject: 'Welcome to Acme',
       header: 'Welcome!',
       body: 'Thank you for joining Acme.',
@@ -63,13 +63,22 @@ describe('Renderers & Utilities', () => {
     });
 
     it('buildPlainText honors noHtmlMessage override if present', () => {
-      const dtoWithExplicitText: BaseEmailDto = {
+      const dtoWithExplicitText: EmailTemplateDto = {
         subject: 'Override',
         body: '<p>HTML body</p>',
         noHtmlMessage: 'Custom fallback text',
       };
 
       expect(buildPlainText(dtoWithExplicitText)).toBe('Custom fallback text');
+    });
+
+    it('remains type-compatible with deprecated BaseEmailDto alias', () => {
+      const legacyDto: BaseEmailDto = {
+        subject: 'Legacy',
+        body: 'Testing legacy alias compatibility',
+      };
+      const text = buildPlainText(legacyDto);
+      expect(text).toContain('Testing legacy alias compatibility');
     });
   });
 });

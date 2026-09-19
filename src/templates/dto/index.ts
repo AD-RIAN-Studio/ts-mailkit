@@ -1,8 +1,7 @@
 /**
- * Base Data Transfer Object for templated emails.
- * Compatible with the legacy EmailTemplateDto while allowing typed extensions.
+ * Data Transfer Object for templated emails.
  */
-export interface BaseEmailDto {
+export interface EmailTemplateDto {
   /** Email subject line */
   subject: string;
   /** Primary headline/header in the email content */
@@ -32,9 +31,9 @@ export interface BaseEmailDto {
 }
 
 /**
- * Legacy alias for BaseEmailDto to ensure 100% drop-in compatibility.
+ * @deprecated Use `EmailTemplateDto` instead. This alias will be removed in v1.0.0.
  */
-export type EmailTemplateDto = BaseEmailDto;
+export type BaseEmailDto = EmailTemplateDto;
 
 /**
  * Parameters for creating an email verification message.

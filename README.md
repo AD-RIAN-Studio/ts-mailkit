@@ -20,6 +20,8 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
   3. Dispatch via the chosen transport adapter.
 - **Multitenant & Dynamic Branding**: Configure global branding, top-center logos, or pass a dynamic brand name resolver for multi-tenant applications.
 - **Top-Center Brand Logo**: Display your brand or company logo top-center with automatic HTTP(S) URL validation.
+- **Auto Plain-Text Fallbacks**: When sending custom or raw HTML, accessible plain-text equivalents are cleanly generated automatically if not explicitly provided.
+- **RFC 5322 Address Parser**: Optional utility to safely parse `"Display Name <email@example.com>"` strings into structured address objects.
 - **Template Preview**: Inspect [`demo-newsletter.html`](demo-newsletter.html) directly in the root folder to view the responsive default email template before installing.
 - **Dual ESM & CommonJS**: Full support for `import` and `require` with first-class TypeScript declaration maps.
 
@@ -201,14 +203,14 @@ describe('User Registration Email', () => {
 
 ### 4. Sending Raw Emails (No Template DTO)
 
-For custom HTML or plain-text messages:
+For custom HTML or plain-text messages. When `text` is omitted, an accessible plain-text fallback is automatically extracted from the `html`:
 
 ```ts
 await mailer.sendRaw({
   to: [{ address: 'support@example.com', name: 'Support Team' }],
   subject: 'Urgent System Alert',
   html: '<h1>System Alert</h1><p>Database failover completed successfully.</p>',
-  text: 'System Alert: Database failover completed successfully.',
+  // text is optional — auto-converted from html if omitted
   attachments: [
     {
       filename: 'report.txt',
@@ -219,7 +221,21 @@ await mailer.sendRaw({
 });
 ```
 
-### 5. Pluggable Transports (`IEmailSender`)
+### 5. Parsing RFC 5322 Email Addresses
+
+If your application receives combined address strings like `"Jane Doe <jane@example.com>"`, use the standalone, tree-shakeable `parseEmailAddress` helper:
+
+```ts
+import { parseEmailAddress } from 'ts-mailkit';
+
+const recipient = parseEmailAddress('Jane Doe <jane@example.com>');
+// => { address: 'jane@example.com', name: 'Jane Doe' }
+
+const simple = parseEmailAddress('jane@example.com');
+// => { address: 'jane@example.com' }
+```
+
+### 6. Pluggable Transports (`IEmailSender`)
 
 You can implement custom transports (e.g. SMTP, Resend, SendGrid, Postmark) by satisfying the `IEmailSender` interface:
 
@@ -267,21 +283,6 @@ pnpm run build
 # Prepublish verification
 pnpm run prepublishOnly
 ```
-
----
-
-## Deprecated API (Scheduled for Removal in v1.0.0)
-
-The following legacy migration bridges are marked `@deprecated` and scheduled for removal in `v1.0.0`:
-
-| Deprecated | Replacement | Notes |
-| :--- | :--- | :--- |
-| `mailer.send(to, template, toName)` | `mailer.send({ to, template, ... })` | Use the type-safe options object. |
-| `sender.sendEmail(...)` | `sender.send({ to, subject, html, text, ... })` | Standardized on `SendMailOptions`. |
-| `mailer.sendSimpleMessage(...)` | `mailer.sendRaw({ to, subject, text, html })` | Direct raw email dispatch. |
-| `mailer.buildPlainTextMessage(template)` | `mailer.render(template)` or `buildPlainText(dto)` | Standalone or client renderer methods. |
-| `EmailService` | `MailKit` | Main client class. |
-| `BaseEmailDto` | `EmailTemplateDto` | Core DTO interface. |
 
 ---
 

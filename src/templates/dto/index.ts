@@ -33,11 +33,6 @@ export interface EmailTemplateDto {
 }
 
 /**
- * @deprecated Use `EmailTemplateDto` instead. This alias will be removed in v1.0.0.
- */
-export type BaseEmailDto = EmailTemplateDto;
-
-/**
  * Parameters for creating an email verification message.
  */
 export interface EmailVerificationParams {

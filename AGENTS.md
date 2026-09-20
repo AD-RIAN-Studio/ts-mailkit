@@ -50,13 +50,14 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 ---
 
-## Code & Migration Conventions
+## Code Conventions
 
-- **Deprecated Migration Bridges (Scheduled for removal in v1.0.0)**:
-  - Positional overload `mailer.send(to, template, toName)` is deprecated in favor of `mailer.send({ to, template, ... })`.
-  - `sendEmail(...)` on `ZeptoMailSender` is deprecated in favor of `send(options: SendMailOptions)`.
-  - `sendSimpleMessage(...)` and `buildPlainTextMessage(...)` on `MailKit` are deprecated in favor of `sendRaw(...)` and `render(...)`.
-  - `EmailService` alias is deprecated in favor of `MailKit`.
-  - `BaseEmailDto` type alias is deprecated in favor of `EmailTemplateDto`.
+- **API Structure**:
+  - `mailer.send({ to, template, ... })` is the single canonical template dispatch method.
+  - `mailer.sendRaw({ to, subject, html, text? })` auto-derives plain-text via `htmlToPlainText` if `text` is omitted.
+  - `MailKit` is the canonical client class (created via `createMailKit(...)`).
+  - `EmailTemplateDto` is the canonical DTO base interface.
+  - Transports strictly implement `IEmailSender.send(options: SendMailOptions)`.
+  - `parseEmailAddress(input: string): EmailAddress` is a tree-shakeable opt-in helper for RFC 5322 parsing.
 - **Reference Data**: `source-data/` is gitignored historical reference data; never import from or write to `source-data/`.
 - **Commits**: Follow Conventional Commits (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`, `test: ...`).

@@ -152,42 +152,4 @@ describe('ZeptoMailSender', () => {
       })
     ).rejects.toThrow(TransportError);
   });
-
-  it('supports legacy sendEmail positional method', async () => {
-    let capturedBody: any = null;
-    const mockFetch = vi.fn().mockImplementation(async (_url: string, init: RequestInit) => {
-      capturedBody = JSON.parse(init.body as string);
-      return {
-        ok: true,
-        status: 200,
-        text: async () => JSON.stringify({ data: [{ message_id: 'legacy-1' }] }),
-      } as Response;
-    });
-
-    const sender = new ZeptoMailSender({
-      apiToken: 'tok',
-      from: 'from@domain.com',
-      fetch: mockFetch,
-    });
-
-    await sender.sendEmail(
-      'target@example.com',
-      '<p>Legacy HTML</p>',
-      'Legacy Subject',
-      'Target User',
-      'Legacy Plaintext',
-      'Custom Brand'
-    );
-
-    expect(capturedBody.to).toEqual([
-      { email_address: { address: 'target@example.com', name: 'Target User' } },
-    ]);
-    expect(capturedBody.from).toEqual({
-      address: 'from@domain.com',
-      name: 'Custom Brand',
-    });
-    expect(capturedBody.subject).toBe('Legacy Subject');
-    expect(capturedBody.htmlbody).toBe('<p>Legacy HTML</p>');
-    expect(capturedBody.textbody).toBe('Legacy Plaintext');
-  });
 });

@@ -5,7 +5,7 @@ import {
   buildPlainText,
 } from '../../src/renderers/default/default-renderer.js';
 import { htmlToPlainText, decodeHtmlEntities } from '../../src/renderers/utils/html-to-plaintext.js';
-import type { EmailTemplateDto, BaseEmailDto } from '../../src/templates/dto/index.js';
+import type { EmailTemplateDto } from '../../src/templates/dto/index.js';
 
 describe('Renderers & Utilities', () => {
   describe('htmlToPlainText', () => {
@@ -70,15 +70,6 @@ describe('Renderers & Utilities', () => {
       };
 
       expect(buildPlainText(dtoWithExplicitText)).toBe('Custom fallback text');
-    });
-
-    it('remains type-compatible with deprecated BaseEmailDto alias', () => {
-      const legacyDto: BaseEmailDto = {
-        subject: 'Legacy',
-        body: 'Testing legacy alias compatibility',
-      };
-      const text = buildPlainText(legacyDto);
-      expect(text).toContain('Testing legacy alias compatibility');
     });
 
     it('renders logo on top-center when a valid https url is provided', () => {

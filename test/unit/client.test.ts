@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { MailKit, createMailKit, EmailService } from '../../src/core/client.js';
+import { MailKit, createMailKit } from '../../src/core/client.js';
 import { MemoryEmailSender } from '../../src/transports/memory/memory-sender.js';
 import { EmailTemplateFactory } from '../../src/templates/factory.js';
 import { ConfigurationError } from '../../src/core/errors.js';
 
-describe('MailKit / EmailService Client', () => {
+describe('MailKit Client', () => {
   it('requires a transport adapter', () => {
     expect(() => new MailKit({} as any)).toThrow(ConfigurationError);
   });
@@ -39,27 +39,6 @@ describe('MailKit / EmailService Client', () => {
     expect(sent?.to).toEqual({ address: 'jordan@example.com', name: 'Jordan' });
   });
 
-  it('supports legacy positional arguments signature', async () => {
-    const memoryTransport = new MemoryEmailSender();
-    const emailService = new EmailService({
-      transport: memoryTransport,
-      defaultFrom: 'service@company.test',
-    });
-
-    const dto = EmailTemplateFactory.createPasswordReset(
-      'Taylor',
-      'https://company.test/reset',
-      '554433'
-    );
-
-    await emailService.send('taylor@example.com', dto, 'Taylor Swift');
-
-    expect(memoryTransport.count()).toBe(1);
-    const sent = memoryTransport.getLastMail();
-    expect(sent?.subject).toBe('Password Reset Request');
-    expect(sent?.to).toEqual({ address: 'taylor@example.com', name: 'Taylor Swift' });
-  });
-
   it('supports dynamic brandNameResolver', async () => {
     const memoryTransport = new MemoryEmailSender();
     const resolver = vi.fn().mockResolvedValue('Tenant School #42');
@@ -90,26 +69,34 @@ describe('MailKit / EmailService Client', () => {
     });
   });
 
-  it('supports sendRaw and sendSimpleMessage', async () => {
+  it('supports sendRaw with explicit text and auto-derived plaintext fallback', async () => {
     const memoryTransport = new MemoryEmailSender();
     const mailer = new MailKit({ transport: memoryTransport });
 
+    // 1. sendRaw with explicit text
     await mailer.sendRaw({
       to: 'raw@example.com',
       subject: 'Raw Email',
       html: '<b>Raw HTML</b>',
-      text: 'Raw Text',
+      text: 'Explicit Text',
     });
 
     expect(memoryTransport.count()).toBe(1);
     expect(memoryTransport.getLastMail()?.subject).toBe('Raw Email');
+    expect(memoryTransport.getLastMail()?.text).toBe('Explicit Text');
 
-    await mailer.sendSimpleMessage('simple@example.com', 'Simple Alert', 'This is a simple text alert.');
+    // 2. sendRaw with html only (auto-derives text fallback)
+    await mailer.sendRaw({
+      to: 'auto@example.com',
+      subject: 'Auto Text',
+      html: '<h1>Title</h1><p>Paragraph text.</p>',
+    });
+
     expect(memoryTransport.count()).toBe(2);
     const last = memoryTransport.getLastMail();
-    expect(last?.subject).toBe('Simple Alert');
-    expect(last?.html).toContain('<pre style="font-family:monospace;white-space:pre-wrap;">This is a simple text alert.</pre>');
-    expect(last?.text).toBe('This is a simple text alert.');
+    expect(last?.subject).toBe('Auto Text');
+    expect(last?.html).toBe('<h1>Title</h1><p>Paragraph text.</p>');
+    expect(last?.text).toBe('Title\n\nParagraph text.');
   });
 
   it('renders without sending', async () => {

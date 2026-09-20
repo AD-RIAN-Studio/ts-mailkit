@@ -1,6 +1,7 @@
 import type { IEmailSender } from '../transports/sender.interface.js';
 import type { IEmailRenderer, RenderedEmail } from '../renderers/renderer.interface.js';
-import { DefaultEmailRenderer, buildPlainText } from '../renderers/default/default-renderer.js';
+import { DefaultEmailRenderer } from '../renderers/default/default-renderer.js';
+import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
 import type { EmailTemplateDto } from '../templates/dto/index.js';
 import {
   normalizeRecipient,
@@ -122,50 +123,22 @@ export class MailKit {
   }
 
   /**
-   * Returns the plain-text fallback for an email DTO without sending.
-   * @deprecated Use `mailer.render(template)` or `buildPlainText(template)` instead. This method will be removed in v1.0.0.
-   */
-  buildPlainTextMessage(template: EmailTemplateDto): string {
-    return template.noHtmlMessage ?? buildPlainText(template);
-  }
-
-  /**
    * Sends an email using a strongly-typed template DTO.
-   * Supports both modern options object:
-   *   `mailer.send({ to: 'user@example.com', template: myDto })`
-   * and legacy positional arguments for seamless migration:
-   *   `mailer.send('user@example.com', myDto, 'User Name')`
+   *
+   * Example:
+   * ```ts
+   * await mailer.send({
+   *   to: 'user@example.com',
+   *   template: myDto,
+   * });
+   * ```
    */
-  async send(options: SendTemplateOptions): Promise<SendResult>;
-  /**
-   * @deprecated Use the options object signature `mailer.send({ to, template, ... })` instead. Positional signature will be removed in v1.0.0.
-   */
-  async send(to: string, template: EmailTemplateDto, toName?: string): Promise<SendResult>;
-  async send(
-    optionsOrTo: SendTemplateOptions | string,
-    maybeTemplate?: EmailTemplateDto,
-    maybeToName?: string
-  ): Promise<SendResult> {
-    let opts: SendTemplateOptions;
-
-    if (typeof optionsOrTo === 'string') {
-      if (!maybeTemplate) {
-        throw new ConfigurationError('MailKit.send: Missing required template DTO argument.');
-      }
-      opts = {
-        to: optionsOrTo,
-        template: maybeTemplate,
-        toName: maybeToName,
-      };
-    } else {
-      opts = optionsOrTo;
-    }
-
-    const template = opts.template;
-    const recipientName = opts.toName ?? template.userName;
+  async send(options: SendTemplateOptions): Promise<SendResult> {
+    const template = options.template;
+    const recipientName = options.toName ?? template.userName;
 
     // Resolve fromName: explicit option > template.fromName > brand resolver > defaultBrandName
-    let resolvedFromName = opts.fromName ?? template.fromName;
+    let resolvedFromName = options.fromName ?? template.fromName;
     if (!resolvedFromName && this.brandNameResolver) {
       resolvedFromName = await this.brandNameResolver();
     }
@@ -179,14 +152,14 @@ export class MailKit {
 
     // Format recipients
     let toRecipients: Recipient | Recipient[];
-    if (typeof opts.to === 'string' && recipientName) {
-      toRecipients = { address: opts.to, name: recipientName };
+    if (typeof options.to === 'string' && recipientName) {
+      toRecipients = { address: options.to, name: recipientName };
     } else {
-      toRecipients = opts.to;
+      toRecipients = options.to;
     }
 
     // Resolve From address
-    let from = opts.from ?? this.defaultFrom;
+    let from = options.from ?? this.defaultFrom;
     if (resolvedFromName && from) {
       const normalizedFrom = normalizeRecipient(from);
       from = { address: normalizedFrom.address, name: resolvedFromName };
@@ -198,57 +171,30 @@ export class MailKit {
       subject: template.subject,
       html: rendered.html,
       text: plaintextBody,
-      cc: opts.cc,
-      bcc: opts.bcc,
-      replyTo: opts.replyTo,
-      attachments: opts.attachments,
-      headers: opts.headers,
-      tags: opts.tags,
-      metadata: opts.metadata,
+      cc: options.cc,
+      bcc: options.bcc,
+      replyTo: options.replyTo,
+      attachments: options.attachments,
+      headers: options.headers,
+      tags: options.tags,
+      metadata: options.metadata,
     });
   }
 
   /**
    * Dispatches a raw, pre-rendered email directly through the transport.
+   * If `options.text` is omitted, plain text is automatically derived from `options.html`.
    */
   async sendRaw(options: SendMailOptions): Promise<SendResult> {
     const from = options.from ?? this.defaultFrom;
+    const text = options.text ?? (options.html ? htmlToPlainText(options.html) : undefined);
     return await this.transport.send({
       ...options,
       from,
-    });
-  }
-
-  /**
-   * Sends a raw plain-text email with basic HTML pre-formatting.
-   * Useful for plain notifications, alerts, or simple text messages.
-   * @deprecated Use `mailer.sendRaw({ to, subject, text, html })` instead. This method will be removed in v1.0.0.
-   */
-  async sendSimpleMessage(
-    to: string,
-    subject: string,
-    text: string,
-    toName: string = ''
-  ): Promise<SendResult> {
-    const html = `<pre style="font-family:monospace;white-space:pre-wrap;">${text}</pre>`;
-    return await this.sendRaw({
-      to: { address: to, name: toName },
-      subject,
-      html,
       text,
     });
   }
 }
-
-/**
- * Drop-in alias for MailKit to maintain compatibility with existing EmailService code.
- * @deprecated Use `MailKit` instead. This alias will be removed in v1.0.0.
- */
-export const EmailService = MailKit;
-/**
- * @deprecated Use `MailKit` instead. This alias will be removed in v1.0.0.
- */
-export type EmailService = MailKit;
 
 /**
  * Convenience factory to create a MailKit client instance.

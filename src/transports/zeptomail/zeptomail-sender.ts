@@ -189,26 +189,4 @@ export class ZeptoMailSender implements IEmailSender {
       response: responseData,
     };
   }
-
-  /**
-   * Backward-compatible helper method matching legacy signature:
-   * `sendEmail(to, htmlBody, subject, toName?, plaintextBody?, fromName?)`
-   * @deprecated Use `send({ to, subject, html, text, ... })` instead. This method will be removed in v1.0.0.
-   */
-  async sendEmail(
-    to: string,
-    htmlBody: string,
-    subject: string,
-    toName: string = '',
-    plaintextBody?: string,
-    fromName?: string
-  ): Promise<void> {
-    await this.send({
-      to: { address: to, name: toName },
-      from: fromName ? { address: this.defaultFrom.address, name: fromName } : this.defaultFrom,
-      subject,
-      html: htmlBody,
-      text: plaintextBody,
-    });
-  }
 }

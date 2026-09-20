@@ -17,6 +17,28 @@ export type Recipient =
   | { email: string; name?: string };
 
 /**
+ * Parses an RFC 5322 formatted address string into an EmailAddress.
+ * Supports formats such as:
+ * - "user@example.com" -> { address: "user@example.com" }
+ * - "Sender Name <sender@example.com>" -> { name: "Sender Name", address: "sender@example.com" }
+ * - "\"Sender Name\" <sender@example.com>" -> { name: "Sender Name", address: "sender@example.com" }
+ */
+export function parseEmailAddress(input: string): EmailAddress {
+  if (!input || typeof input !== 'string') {
+    return { address: '' };
+  }
+  const trimmed = input.trim();
+  const match = trimmed.match(/^(?:["']?([^"']+)["']?\s+)?<?([^\s<>@]+@[^\s<>@]+)>?$/);
+  if (!match) {
+    return { address: trimmed };
+  }
+  return {
+    address: match[2].trim(),
+    name: match[1]?.trim() || undefined,
+  };
+}
+
+/**
  * Normalizes a Recipient value into a standardized EmailAddress.
  */
 export function normalizeRecipient(recipient: Recipient): EmailAddress {

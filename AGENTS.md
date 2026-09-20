@@ -20,7 +20,7 @@ Always use `pnpm` (`pnpm@11.22.0` enforced in `packageManager`):
 - **Unit Test (single file)**: `pnpm vitest run test/unit/client.test.ts`
 - **Unit Test (name pattern)**: `pnpm vitest run test/unit/client.test.ts -t "legacy positional"`
 - **Watch Tests**: `pnpm run test:watch`
-- **Build**: `pnpm run build` (`tsup && tsc --emitDeclarationOnly`)
+- **Build**: `pnpm run build` (`tsdown && tsc --emitDeclarationOnly`)
 - **Prepublish Check**: `pnpm run prepublishOnly`
 
 ### Verification Sequence
@@ -45,7 +45,7 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 ## Toolchain & Tree-Shaking Quirks
 
-- **Build Pipeline**: `tsup.config.ts` has `dts: false`. Declarations and declaration maps are emitted strictly via `tsc --emitDeclarationOnly`. Never remove `tsc` from the `build` script.
+- **Build Pipeline**: `tsdown.config.ts` has `dts: false` (explicit — tsdown auto-enables DTS when `package.json` has a `types` field). Declarations and declaration maps are emitted strictly via `tsc --emitDeclarationOnly`. Never remove `tsc` from the `build` script.
 - **`sideEffects: false`**: Configured in `package.json`. Avoid adding top-level eager instantiation, module-scope network calls, or side-effectful top-level statements.
 - **Lazy Singletons**: `EmailTemplateFactory.defaultInstance` must remain a lazy getter (`get defaultInstance()`). Eager `new EmailTemplateFactory()` calls at module scope break bundler dead-code elimination.
 - **Zero Runtime Dependencies**: Core transports must rely on the standard web `fetch` API. Do not introduce runtime HTTP clients (`axios`, `node-fetch`, or vendor SDKs).

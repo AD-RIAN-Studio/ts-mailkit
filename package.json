@@ -31,8 +31,8 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly",
-    "dev": "tsup --watch",
+    "build": "tsdown && tsc --emitDeclarationOnly",
+    "dev": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run test/unit",
     "test:unit": "vitest run test/unit",
@@ -54,7 +54,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^26.1.1",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.23.0",
     "tsx": "^4.19.3",
     "typescript": "^7.0.2",
     "vitest": "^3.0.7"

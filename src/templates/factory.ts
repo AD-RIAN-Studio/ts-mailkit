@@ -1,4 +1,4 @@
-import type { EmailTemplateDto } from './dto/index.js';
+import type { EmailTemplateDto, EmailVerificationParams, MagicLinkParams, NewsletterParams, PasswordResetParams, SimpleMessageParams, TwoFactorParams,} from './dto/index.js';
 import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
 
 export interface BrandingConfig {
@@ -65,12 +65,8 @@ export class EmailTemplateFactory {
   /**
    * Welcome / email-verification email sent after registration.
    */
-  createEmailVerification(
-    username: string,
-    verificationUrl: string,
-    otp: string,
-    brandName?: string
-  ): EmailTemplateDto {
+  createEmailVerification(params: EmailVerificationParams): EmailTemplateDto {
+    const { username, verificationUrl, otp, brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Thank you for signing up. Use the code below or click the button to verify your email address.`;
     return {
@@ -92,14 +88,23 @@ export class EmailTemplateFactory {
   }
 
   /**
-   * Password-reset email with an optional OTP code and action link.
+   * @deprecated Use `createEmailVerification({ username, verificationUrl, otp, brandName })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
    */
-  createPasswordReset(
+  createEmailVerification_Legacy(
     username: string,
-    resetUrl: string,
-    otp: string = '',
+    verificationUrl: string,
+    otp: string,
     brandName?: string
   ): EmailTemplateDto {
+    return this.createEmailVerification({ username, verificationUrl, otp, brandName });
+  }
+
+  /**
+   * Password-reset email with an optional OTP code and action link.
+   */
+  createPasswordReset(params: PasswordResetParams): EmailTemplateDto {
+    const { username, resetUrl, otp = '', brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>We received a request to reset your password. Use the OTP code below or click the button to proceed.`;
     const plainTextOtp = otp ? `\n\nYour OTP code is: ${otp}` : '';
@@ -123,14 +128,23 @@ export class EmailTemplateFactory {
   }
 
   /**
-   * Generic plain message email (no action button, no OTP).
+   * @deprecated Use `createPasswordReset({ username, resetUrl, otp, brandName })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
    */
-  createSimpleMessage(
-    subject: string,
-    header: string,
-    body: string,
+  createPasswordReset_Legacy(
+    username: string,
+    resetUrl: string,
+    otp: string = '',
     brandName?: string
   ): EmailTemplateDto {
+    return this.createPasswordReset({ username, resetUrl, otp, brandName });
+  }
+
+  /**
+   * Generic plain message email (no action button, no OTP).
+   */
+  createSimpleMessage(params: SimpleMessageParams): EmailTemplateDto {
+    const { subject, header, body, brandName } = params;
     const brand = this.resolveBrand(brandName);
     return {
       subject,
@@ -144,18 +158,23 @@ export class EmailTemplateFactory {
   }
 
   /**
-   * Newsletter / announcement email with an optional hero image and CTA button.
+   * @deprecated Use `createSimpleMessage({ subject, header, body, brandName })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
    */
-  createNewsLetter(
+  createSimpleMessage_Legacy(
     subject: string,
     header: string,
     body: string,
-    imageUrl?: string,
-    actionUrl?: string,
-    actionText?: string,
-    brandName?: string,
-    logoUrl?: string
+    brandName?: string
   ): EmailTemplateDto {
+    return this.createSimpleMessage({ subject, header, body, brandName });
+  }
+
+  /**
+   * Newsletter / announcement email with an optional hero image and CTA button.
+   */
+  createNewsLetter(params: NewsletterParams): EmailTemplateDto {
+    const { subject, header, body, imageUrl, actionUrl, actionText, brandName, logoUrl } = params;
     const brand = this.resolveBrand(brandName);
     let noHtmlMessage = htmlToPlainText(body);
     if (actionUrl) {
@@ -176,14 +195,36 @@ export class EmailTemplateFactory {
   }
 
   /**
+   * @deprecated Use `createNewsLetter({ subject, header, body, imageUrl, actionUrl, actionText, brandName, logoUrl })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
+   */
+  createNewsLetter_Legacy(
+    subject: string,
+    header: string,
+    body: string,
+    imageUrl?: string,
+    actionUrl?: string,
+    actionText?: string,
+    brandName?: string,
+    logoUrl?: string
+  ): EmailTemplateDto {
+    return this.createNewsLetter({
+      subject,
+      header,
+      body,
+      imageUrl,
+      actionUrl,
+      actionText,
+      brandName,
+      logoUrl,
+    });
+  }
+
+  /**
    * Two-factor authentication email with OTP code and optional magic link.
    */
-  create2FAEmail(
-    username: string,
-    otp: string,
-    magicLink: string = '',
-    brandName?: string
-  ): EmailTemplateDto {
+  create2FAEmail(params: TwoFactorParams): EmailTemplateDto {
+    const { username, otp, magicLink = '', brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Use the code below or click the button to complete your login.`;
     const plainLink = magicLink ? `\n\nAlternatively, verify here:\n${magicLink}` : '';
@@ -204,13 +245,23 @@ export class EmailTemplateFactory {
   }
 
   /**
-   * Magic link sign-in email (no OTP, button only).
+   * @deprecated Use `create2FAEmail({ username, otp, magicLink, brandName })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
    */
-  createMagicLinkEmail(
+  create2FAEmail_Legacy(
     username: string,
-    magicLink: string,
+    otp: string,
+    magicLink: string = '',
     brandName?: string
   ): EmailTemplateDto {
+    return this.create2FAEmail({ username, otp, magicLink, brandName });
+  }
+
+  /**
+   * Magic link sign-in email (no OTP, button only).
+   */
+  createMagicLinkEmail(params: MagicLinkParams): EmailTemplateDto {
+    const { username, magicLink, brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Click the button below to sign in. No password needed.`;
     return {
@@ -228,6 +279,18 @@ export class EmailTemplateFactory {
     };
   }
 
+  /**
+   * @deprecated Use `createMagicLinkEmail({ username, magicLink, brandName })` with the Parameter Object pattern instead.
+   * Will be removed in the next major release.
+   */
+  createMagicLinkEmail_Legacy(
+    username: string,
+    magicLink: string,
+    brandName?: string
+  ): EmailTemplateDto {
+    return this.createMagicLinkEmail({ username, magicLink, brandName });
+  }
+
   // ─── Default Static Instance ──────────────────────────────────────────────
   private static _defaultInstance?: EmailTemplateFactory;
 
@@ -238,34 +301,66 @@ export class EmailTemplateFactory {
     return this._defaultInstance;
   }
 
-  static createEmailVerification(
+  static createEmailVerification(params: EmailVerificationParams): EmailTemplateDto {
+    return this.defaultInstance.createEmailVerification(params);
+  }
+
+  /**
+   * @deprecated Use `createEmailVerification(params: EmailVerificationParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static createEmailVerification_Legacy(
     username: string,
     verificationUrl: string,
     otp: string,
     brandName?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.createEmailVerification(username, verificationUrl, otp, brandName);
+    return this.defaultInstance.createEmailVerification({ username, verificationUrl, otp, brandName });
   }
 
-  static createPasswordReset(
+  static createPasswordReset(params: PasswordResetParams): EmailTemplateDto {
+    return this.defaultInstance.createPasswordReset(params);
+  }
+
+  /**
+   * @deprecated Use `createPasswordReset(params: PasswordResetParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static createPasswordReset_Legacy(
     username: string,
     resetUrl: string,
     otp?: string,
     brandName?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.createPasswordReset(username, resetUrl, otp, brandName);
+    return this.defaultInstance.createPasswordReset({ username, resetUrl, otp, brandName });
   }
 
-  static createSimpleMessage(
+  static createSimpleMessage(params: SimpleMessageParams): EmailTemplateDto {
+    return this.defaultInstance.createSimpleMessage(params);
+  }
+
+  /**
+   * @deprecated Use `createSimpleMessage(params: SimpleMessageParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static createSimpleMessage_Legacy(
     subject: string,
     header: string,
     body: string,
     brandName?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.createSimpleMessage(subject, header, body, brandName);
+    return this.defaultInstance.createSimpleMessage({ subject, header, body, brandName });
   }
 
-  static createNewsLetter(
+  static createNewsLetter(params: NewsletterParams): EmailTemplateDto {
+    return this.defaultInstance.createNewsLetter(params);
+  }
+
+  /**
+   * @deprecated Use `createNewsLetter(params: NewsletterParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static createNewsLetter_Legacy(
     subject: string,
     header: string,
     body: string,
@@ -275,7 +370,7 @@ export class EmailTemplateFactory {
     brandName?: string,
     logoUrl?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.createNewsLetter(
+    return this.defaultInstance.createNewsLetter({
       subject,
       header,
       body,
@@ -283,24 +378,40 @@ export class EmailTemplateFactory {
       actionUrl,
       actionText,
       brandName,
-      logoUrl
-    );
+      logoUrl,
+    });
   }
 
-  static create2FAEmail(
+  static create2FAEmail(params: TwoFactorParams): EmailTemplateDto {
+    return this.defaultInstance.create2FAEmail(params);
+  }
+
+  /**
+   * @deprecated Use `create2FAEmail(params: TwoFactorParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static create2FAEmail_Legacy(
     username: string,
     otp: string,
     magicLink?: string,
     brandName?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.create2FAEmail(username, otp, magicLink, brandName);
+    return this.defaultInstance.create2FAEmail({ username, otp, magicLink, brandName });
   }
 
-  static createMagicLinkEmail(
+  static createMagicLinkEmail(params: MagicLinkParams): EmailTemplateDto {
+    return this.defaultInstance.createMagicLinkEmail(params);
+  }
+
+  /**
+   * @deprecated Use `createMagicLinkEmail(params: MagicLinkParams)` instead.
+   * Will be removed in the next major release.
+   */
+  static createMagicLinkEmail_Legacy(
     username: string,
     magicLink: string,
     brandName?: string
   ): EmailTemplateDto {
-    return this.defaultInstance.createMagicLinkEmail(username, magicLink, brandName);
+    return this.defaultInstance.createMagicLinkEmail({ username, magicLink, brandName });
   }
 }

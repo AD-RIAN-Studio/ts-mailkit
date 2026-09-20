@@ -16,12 +16,12 @@ describe('MailKit Client', () => {
       defaultFrom: { address: 'no-reply@myapp.test', name: 'My App' },
     });
 
-    const dto = EmailTemplateFactory.createEmailVerification(
-      'Jordan',
-      'https://myapp.test/verify?token=abc',
-      '123789',
-      'My App'
-    );
+    const dto = EmailTemplateFactory.createEmailVerification({
+      username: 'Jordan',
+      verificationUrl: 'https://myapp.test/verify?token=abc',
+      otp: '123789',
+      brandName: 'My App',
+    });
 
     const result = await mailer.send({
       to: 'jordan@example.com',
@@ -103,7 +103,7 @@ describe('MailKit Client', () => {
     const memoryTransport = new MemoryEmailSender();
     const mailer = new MailKit({ transport: memoryTransport });
 
-    const dto = EmailTemplateFactory.createSimpleMessage('Header', 'Subject', 'Message Body');
+    const dto = EmailTemplateFactory.createSimpleMessage({ subject: 'Header', header: 'Subject', body: 'Message Body' });
     const rendered = await mailer.render(dto);
 
     expect(rendered.html).toContain('Message Body');

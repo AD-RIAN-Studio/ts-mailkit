@@ -64,3 +64,8 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
   - `parseEmailAddress(input: string): EmailAddress` is a tree-shakeable opt-in helper for RFC 5322 parsing.
 - **Reference Data**: `source-data/` is gitignored historical reference data; never import from or write to `source-data/`.
 - **Commits**: Follow Conventional Commits (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`, `test: ...`).
+- **Single Source of Truth (no aliasing / no re-exports / no spaghetti)**:
+  - Define each type/interface exactly once in its canonical module (e.g. parameter objects live in `src/templates/dto/index.ts`).
+  - Consumers import the canonical type directly — never create `export type X = Y` aliases to match method names.
+  - Never re-export imported types from intermediate modules (`factory.ts` must not `export type { ... }` what `dto/index.ts` already exports; `src/index.ts` barrel re-exports are the only exception).
+  - Method signatures reference canonical names verbatim (e.g. `createNewsLetter(params: NewsletterParams)`, not `NewsLetterParams`).

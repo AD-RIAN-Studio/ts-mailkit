@@ -30,14 +30,14 @@ describe('Demo Newsletter HTML Output', () => {
       '<p>Explore the repository, test the components, and build beautiful transactional emails effortlessly.</p>',
     ].join('');
 
-    const newsletterDto = factory.createNewsLetter(
-      'September 2026 Engineering & Product Update',
-      'Introducing ts-mailkit: Modular Emails for Modern Runtimes',
-      bodyContent,
-      'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&auto=format&fit=crop&q=80',
-      'https://github.com/AD-RIAN-Studio/ts-mailkit',
-      'Explore ts-mailkit on GitHub'
-    );
+    const newsletterDto = factory.createNewsLetter({
+      subject: 'September 2026 Engineering & Product Update',
+      header: 'Introducing ts-mailkit: Modular Emails for Modern Runtimes',
+      body: bodyContent,
+      imageUrl: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=1200&auto=format&fit=crop&q=80',
+      actionUrl: 'https://github.com/AD-RIAN-Studio/ts-mailkit',
+      actionText: 'Explore ts-mailkit on GitHub',
+    });
 
     const renderer = new DefaultEmailRenderer({
       primaryColor: '#4f46e5',

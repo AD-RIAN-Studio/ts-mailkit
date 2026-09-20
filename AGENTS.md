@@ -7,7 +7,7 @@
 - **Distribution format**: Dual ESM (`dist/index.js`) and CommonJS (`dist/index.cjs`) with declaration maps (`dist/index.d.ts`).
 - **Main entrypoint**: `src/index.ts`.
 - **Branching Strategy**: Dedicated branches per major version (e.g. `v0` for 0.x maintenance), with `main` tracking the active latest major release (v1.x).
-- **Changelog Convention**: Major changelogs are tracked in `changelogs/` per major version (`changelogs/v0.md`, `changelogs/v1.md`).
+- **Changelog Convention**: Major changelogs are tracked in `changelogs/` per major version (`changelogs/v0.md`, `changelogs/v1.md`, `changelogs/v2.md`).
 
 ---
 

@@ -72,11 +72,11 @@ const mailer = createMailKit({
 
 ```ts
 // 1. Create a strongly typed email verification DTO
-const verificationEmail = EmailTemplateFactory.createEmailVerification(
-  'Alex',
-  'https://app.example.com/verify?token=xyz123',
-  '482910'
-);
+const verificationEmail = EmailTemplateFactory.createEmailVerification({
+  username: 'Alex',
+  verificationUrl: 'https://app.example.com/verify?token=xyz123',
+  otp: '482910',
+});
 
 // 2. Dispatch via MailKit
 await mailer.send({
@@ -97,41 +97,41 @@ await mailer.send({
 import { EmailTemplateFactory } from 'ts-mailkit';
 
 // Email Verification with OTP
-const verifyDto = EmailTemplateFactory.createEmailVerification(
-  'Jordan',
-  'https://app.com/verify?token=abc',
-  '123456'
-);
+const verifyDto = EmailTemplateFactory.createEmailVerification({
+  username: 'Jordan',
+  verificationUrl: 'https://app.com/verify?token=abc',
+  otp: '123456',
+});
 
 // Password Reset
-const resetDto = EmailTemplateFactory.createPasswordReset(
-  'Jordan',
-  'https://app.com/reset?token=abc',
-  '654321'
-);
+const resetDto = EmailTemplateFactory.createPasswordReset({
+  username: 'Jordan',
+  resetUrl: 'https://app.com/reset?token=abc',
+  otp: '654321',
+});
 
 // Two-Factor Authentication (2FA)
-const twoFactorDto = EmailTemplateFactory.create2FAEmail(
-  'Jordan',
-  '987654',
-  'https://app.com/2fa/magic?token=abc'
-);
+const twoFactorDto = EmailTemplateFactory.create2FAEmail({
+  username: 'Jordan',
+  otp: '987654',
+  magicLink: 'https://app.com/2fa/magic?token=abc',
+});
 
 // Magic Link Sign-in
-const magicLinkDto = EmailTemplateFactory.createMagicLinkEmail(
-  'Jordan',
-  'https://app.com/auth/magic?token=abc'
-);
+const magicLinkDto = EmailTemplateFactory.createMagicLinkEmail({
+  username: 'Jordan',
+  magicLink: 'https://app.com/auth/magic?token=abc',
+});
 
 // Newsletter / Announcement
-const newsDto = EmailTemplateFactory.createNewsLetter(
-  'Product Update - Fall 2026',
-  'Introducing New Features',
-  'Here is what our team shipped this month.',
-  'https://cdn.example.com/hero.png',
-  'https://app.com/blog/update',
-  'Read Release Notes'
-);
+const newsDto = EmailTemplateFactory.createNewsLetter({
+  subject: 'Product Update - Fall 2026',
+  header: 'Introducing New Features',
+  body: 'Here is what our team shipped this month.',
+  imageUrl: 'https://cdn.example.com/hero.png',
+  actionUrl: 'https://app.com/blog/update',
+  actionText: 'Read Release Notes',
+});
 ```
 
 ### 2. Custom Branding & Multi-tenancy
@@ -146,11 +146,11 @@ const tenantFactory = new EmailTemplateFactory({
   footer: (brand) => `© ${new Date().getFullYear()} ${brand}. Authorized educational portal.`,
 });
 
-const studentEmail = tenantFactory.createEmailVerification(
-  'Student',
-  'https://school.edu/verify',
-  '554433'
-);
+const studentEmail = tenantFactory.createEmailVerification({
+  username: 'Student',
+  verificationUrl: 'https://school.edu/verify',
+  otp: '554433',
+});
 ```
 
 Or pass a dynamic tenant resolver to `MailKit`:
@@ -184,11 +184,11 @@ describe('User Registration Email', () => {
   });
 
   it('sends verification code to the registered user', async () => {
-    const dto = EmailTemplateFactory.createEmailVerification(
-      'Sam',
-      'https://app.com/verify?token=123',
-      '889900'
-    );
+    const dto = EmailTemplateFactory.createEmailVerification({
+      username: 'Sam',
+      verificationUrl: 'https://app.com/verify?token=123',
+      otp: '889900',
+    });
 
     await mailer.send({ to: 'sam@example.com', template: dto });
 

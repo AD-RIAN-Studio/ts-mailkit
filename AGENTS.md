@@ -6,6 +6,8 @@
 - **Target runtimes**: Universal (Node.js 18+, Cloudflare Workers `workerd`, Bun, Deno, Next.js Edge).
 - **Distribution format**: Dual ESM (`dist/index.js`) and CommonJS (`dist/index.cjs`) with declaration maps (`dist/index.d.ts`).
 - **Main entrypoint**: `src/index.ts`.
+- **Branching Strategy**: Dedicated branches per major version (e.g. `v0` for 0.x maintenance), with `main` tracking the active latest major release (v1.x).
+- **Changelog Convention**: Major changelogs are tracked in `changelogs/` per major version (`changelogs/v0.md`, `changelogs/v1.md`).
 
 ---
 
@@ -50,20 +52,14 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 ---
 
-## Code & Migration Conventions
+## Code Conventions
 
-- **Deprecated Migration Bridges (Scheduled for removal in v1.0.0)**:
-  - `ZeptoMailSender` and `ZeptoMailConfig` are deprecated in favor of `ZeptoMailHttpSender` and `ZeptoMailHttpConfig`.
-  - Positional overload `mailer.send(to, template, toName)` is deprecated in favor of `mailer.send({ to, template, ... })`.
-  - `sendEmail(...)` on `ZeptoMailHttpSender` is deprecated in favor of `send(options: SendMailOptions)`.
-  - `sendSimpleMessage(...)` and `buildPlainTextMessage(...)` on `MailKit` are deprecated in favor of `sendRaw(...)` and `render(...)`.
-  - `EmailService` alias is deprecated in favor of `MailKit`.
-  - `BaseEmailDto` type alias is deprecated in favor of `EmailTemplateDto`.
 - **API Structure**:
   - `mailer.send({ to, template, ... })` is the single canonical template dispatch method.
   - `mailer.sendRaw({ to, subject, html, text? })` auto-derives plain-text via `htmlToPlainText` if `text` is omitted.
   - `MailKit` is the canonical client class (created via `createMailKit(...)`).
   - `EmailTemplateDto` is the canonical DTO base interface.
+  - `ZeptoMailHttpSender` is the canonical Zoho ZeptoMail HTTP adapter (takes `ZeptoMailHttpConfig`).
   - Transports strictly implement `IEmailSender.send(options: SendMailOptions)`.
   - `parseEmailAddress(input: string): EmailAddress` is a tree-shakeable opt-in helper for RFC 5322 parsing.
 - **Reference Data**: `source-data/` is gitignored historical reference data; never import from or write to `source-data/`.

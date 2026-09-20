@@ -25,12 +25,6 @@ export interface ZeptoMailHttpConfig {
   fetch?: typeof fetch;
 }
 
-/**
- * Configuration options for ZeptoMailHttpSender.
- * @deprecated Use `ZeptoMailHttpConfig` instead. This alias will be removed in v1.0.0.
- */
-export type ZeptoMailConfig = ZeptoMailHttpConfig;
-
 export interface ZeptoMailAddressObject {
   address: string;
   name?: string;

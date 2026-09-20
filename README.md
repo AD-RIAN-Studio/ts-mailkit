@@ -286,23 +286,6 @@ pnpm run prepublishOnly
 
 ---
 
-## Deprecated API (Scheduled for Removal in v1.0.0)
-
-The following legacy migration bridges and aliases are marked `@deprecated` and scheduled for removal in `v1.0.0`:
-
-| Deprecated | Replacement | Notes |
-| :--- | :--- | :--- |
-| `ZeptoMailSender` | `ZeptoMailHttpSender` | Renamed to explicitly signify HTTP transport adapter. |
-| `ZeptoMailConfig` | `ZeptoMailHttpConfig` | Configuration interface rename. |
-| `sender.sendEmail(...)` | `sender.send({ to, subject, html, text, ... })` | Standardized on `SendMailOptions`. |
-| `mailer.send(to, template, toName)` | `mailer.send({ to, template, ... })` | Use the type-safe options object. |
-| `mailer.sendSimpleMessage(...)` | `mailer.sendRaw({ to, subject, text, html })` | Direct raw email dispatch. |
-| `mailer.buildPlainTextMessage(template)` | `mailer.render(template)` or `buildPlainText(dto)` | Standalone or client renderer methods. |
-| `EmailService` | `MailKit` | Main client class. |
-| `BaseEmailDto` | `EmailTemplateDto` | Core DTO interface. |
-
----
-
 ## License
 
 [MIT](LICENSE)

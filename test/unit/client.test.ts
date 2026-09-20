@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from 'vitest';
-import { MailKit, createMailKit } from '../../src/core/client.js';
+import { MailKit, createMailKit, EmailService } from '../../src/core/client.js';
 import { MemoryEmailSender } from '../../src/transports/memory/memory-sender.js';
 import { EmailTemplateFactory } from '../../src/templates/factory.js';
 import { ConfigurationError } from '../../src/core/errors.js';
 
-describe('MailKit Client', () => {
+describe('MailKit / EmailService Client', () => {
   it('requires a transport adapter', () => {
     expect(() => new MailKit({} as any)).toThrow(ConfigurationError);
   });
@@ -37,6 +37,27 @@ describe('MailKit Client', () => {
     expect(sent?.html).toContain('123789');
     expect(sent?.text).toContain('Your verification code is: 123789');
     expect(sent?.to).toEqual({ address: 'jordan@example.com', name: 'Jordan' });
+  });
+
+  it('supports legacy positional arguments signature', async () => {
+    const memoryTransport = new MemoryEmailSender();
+    const emailService = new EmailService({
+      transport: memoryTransport,
+      defaultFrom: 'service@company.test',
+    });
+
+    const dto = EmailTemplateFactory.createPasswordReset(
+      'Taylor',
+      'https://company.test/reset',
+      '554433'
+    );
+
+    await emailService.send('taylor@example.com', dto, 'Taylor Swift');
+
+    expect(memoryTransport.count()).toBe(1);
+    const sent = memoryTransport.getLastMail();
+    expect(sent?.subject).toBe('Password Reset Request');
+    expect(sent?.to).toEqual({ address: 'taylor@example.com', name: 'Taylor Swift' });
   });
 
   it('supports dynamic brandNameResolver', async () => {
@@ -97,6 +118,14 @@ describe('MailKit Client', () => {
     expect(last?.subject).toBe('Auto Text');
     expect(last?.html).toBe('<h1>Title</h1><p>Paragraph text.</p>');
     expect(last?.text).toBe('Title\n\nParagraph text.');
+
+    // 3. sendSimpleMessage
+    await mailer.sendSimpleMessage('simple@example.com', 'Simple Alert', 'This is a simple text alert.');
+    expect(memoryTransport.count()).toBe(3);
+    const simple = memoryTransport.getLastMail();
+    expect(simple?.subject).toBe('Simple Alert');
+    expect(simple?.html).toContain('<pre style="font-family:monospace;white-space:pre-wrap;">This is a simple text alert.</pre>');
+    expect(simple?.text).toBe('This is a simple text alert.');
   });
 
   it('renders without sending', async () => {

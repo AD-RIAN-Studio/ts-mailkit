@@ -33,7 +33,7 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 - `src/core/`: Domain models (`types.ts`), error hierarchy (`errors.ts`), and client facade (`client.ts`).
 - `src/transports/`: Pluggable senders implementing `IEmailSender`.
-  - `src/transports/zeptomail/`: Zoho ZeptoMail HTTP adapter (uses global `fetch`).
+  - `src/transports/zeptomail/`: Zoho ZeptoMail HTTP adapter (`ZeptoMailHttpSender`, uses global `fetch`).
   - `src/transports/memory/`: In-memory transport for unit/integration tests.
   - `src/transports/console/`: Terminal logger transport for dev mode.
 - `src/templates/`: Strongly typed email DTO schemas (`dto/`) and `EmailTemplateFactory` (`factory.ts`).
@@ -50,8 +50,15 @@ pnpm run typecheck && pnpm test:unit && pnpm run build
 
 ---
 
-## Code Conventions
+## Code & Migration Conventions
 
+- **Deprecated Migration Bridges (Scheduled for removal in v1.0.0)**:
+  - `ZeptoMailSender` and `ZeptoMailConfig` are deprecated in favor of `ZeptoMailHttpSender` and `ZeptoMailHttpConfig`.
+  - Positional overload `mailer.send(to, template, toName)` is deprecated in favor of `mailer.send({ to, template, ... })`.
+  - `sendEmail(...)` on `ZeptoMailHttpSender` is deprecated in favor of `send(options: SendMailOptions)`.
+  - `sendSimpleMessage(...)` and `buildPlainTextMessage(...)` on `MailKit` are deprecated in favor of `sendRaw(...)` and `render(...)`.
+  - `EmailService` alias is deprecated in favor of `MailKit`.
+  - `BaseEmailDto` type alias is deprecated in favor of `EmailTemplateDto`.
 - **API Structure**:
   - `mailer.send({ to, template, ... })` is the single canonical template dispatch method.
   - `mailer.sendRaw({ to, subject, html, text? })` auto-derives plain-text via `htmlToPlainText` if `text` is omitted.

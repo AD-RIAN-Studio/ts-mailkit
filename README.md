@@ -10,7 +10,7 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
 
 - **Type-Safe DTOs**: Strongly-typed Data Transfer Objects for transactional emails (verification, password reset, 2FA, magic links, newsletters).
 - **Pluggable Transports (`IEmailSender`)**: Decoupled transport adapter interface with built-in senders:
-  - `ZeptoMailSender` (Zoho Mail transactional API via native `fetch`).
+  - `ZeptoMailHttpSender` (Zoho Mail transactional API via native `fetch`).
   - `MemoryEmailSender` (In-memory mock transport for unit and integration testing).
   - `ConsoleEmailSender` (Formatted terminal logger for local development).
 - **Zero Runtime Dependencies**: Core uses standard web APIs (global `fetch`), ensuring zero heavy dependencies and complete edge compatibility.
@@ -52,10 +52,10 @@ bun add ts-mailkit
 ### 1. Initialize Transport & Client
 
 ```ts
-import { createMailKit, ZeptoMailSender, EmailTemplateFactory } from 'ts-mailkit';
+import { createMailKit, ZeptoMailHttpSender, EmailTemplateFactory } from 'ts-mailkit';
 
 // Configure the Zoho ZeptoMail HTTP transport
-const transport = new ZeptoMailSender({
+const transport = new ZeptoMailHttpSender({
   apiToken: process.env.ZEPTO_MAIL_TOKEN!,
   apiHost: 'api.zeptomail.com', // or 'api.zeptomail.eu', 'api.zeptomail.in'
   from: { address: 'noreply@yourdomain.com', name: 'Acme App' },
@@ -283,6 +283,23 @@ pnpm run build
 # Prepublish verification
 pnpm run prepublishOnly
 ```
+
+---
+
+## Deprecated API (Scheduled for Removal in v1.0.0)
+
+The following legacy migration bridges and aliases are marked `@deprecated` and scheduled for removal in `v1.0.0`:
+
+| Deprecated | Replacement | Notes |
+| :--- | :--- | :--- |
+| `ZeptoMailSender` | `ZeptoMailHttpSender` | Renamed to explicitly signify HTTP transport adapter. |
+| `ZeptoMailConfig` | `ZeptoMailHttpConfig` | Configuration interface rename. |
+| `sender.sendEmail(...)` | `sender.send({ to, subject, html, text, ... })` | Standardized on `SendMailOptions`. |
+| `mailer.send(to, template, toName)` | `mailer.send({ to, template, ... })` | Use the type-safe options object. |
+| `mailer.sendSimpleMessage(...)` | `mailer.sendRaw({ to, subject, text, html })` | Direct raw email dispatch. |
+| `mailer.buildPlainTextMessage(template)` | `mailer.render(template)` or `buildPlainText(dto)` | Standalone or client renderer methods. |
+| `EmailService` | `MailKit` | Main client class. |
+| `BaseEmailDto` | `EmailTemplateDto` | Core DTO interface. |
 
 ---
 

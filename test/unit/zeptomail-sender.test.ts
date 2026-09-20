@@ -1,24 +1,36 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ZeptoMailSender } from '../../src/transports/zeptomail/zeptomail-sender.js';
+import {
+  ZeptoMailHttpSender,
+  ZeptoMailSender,
+} from '../../src/transports/zeptomail/zeptomail-sender.js';
 import { ConfigurationError, TransportError } from '../../src/core/errors.js';
 
-describe('ZeptoMailSender', () => {
+describe('ZeptoMailHttpSender', () => {
   it('validates required configuration', () => {
-    expect(() => new ZeptoMailSender({} as any)).toThrow(ConfigurationError);
+    expect(() => new ZeptoMailHttpSender({} as any)).toThrow(ConfigurationError);
     expect(
       () =>
-        new ZeptoMailSender({
+        new ZeptoMailHttpSender({
           apiToken: '',
           from: 'noreply@domain.com',
         })
     ).toThrow(ConfigurationError);
     expect(
       () =>
-        new ZeptoMailSender({
+        new ZeptoMailHttpSender({
           apiToken: 'token123',
           from: '',
         })
     ).toThrow(ConfigurationError);
+  });
+
+  it('provides ZeptoMailSender as an identical deprecated alias', () => {
+    expect(ZeptoMailSender).toBe(ZeptoMailHttpSender);
+    const sender = new ZeptoMailSender({
+      apiToken: 'token123',
+      from: 'noreply@domain.com',
+    });
+    expect(sender).toBeInstanceOf(ZeptoMailHttpSender);
   });
 
   it('normalizes authorization header and default host', async () => {
@@ -37,7 +49,7 @@ describe('ZeptoMailSender', () => {
       } as Response;
     });
 
-    const sender = new ZeptoMailSender({
+    const sender = new ZeptoMailHttpSender({
       apiToken: 'test_token',
       from: { address: 'verified@domain.com', name: 'My Brand' },
       fetch: mockFetch,
@@ -79,7 +91,7 @@ describe('ZeptoMailSender', () => {
       } as Response;
     });
 
-    const sender = new ZeptoMailSender({
+    const sender = new ZeptoMailHttpSender({
       apiHost: 'api.zeptomail.eu',
       apiToken: 'Zoho-enczapikey eu_custom_token',
       from: 'system@eu.domain.com',
@@ -138,7 +150,7 @@ describe('ZeptoMailSender', () => {
         }),
     } as Response);
 
-    const sender = new ZeptoMailSender({
+    const sender = new ZeptoMailHttpSender({
       apiToken: 'bad_token',
       from: 'system@domain.com',
       fetch: mockFetch,
@@ -151,5 +163,43 @@ describe('ZeptoMailSender', () => {
         html: '<p>Test</p>',
       })
     ).rejects.toThrow(TransportError);
+  });
+
+  it('supports legacy sendEmail positional method', async () => {
+    let capturedBody: any = null;
+    const mockFetch = vi.fn().mockImplementation(async (_url: string, init: RequestInit) => {
+      capturedBody = JSON.parse(init.body as string);
+      return {
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ data: [{ message_id: 'legacy-1' }] }),
+      } as Response;
+    });
+
+    const sender = new ZeptoMailHttpSender({
+      apiToken: 'tok',
+      from: 'from@domain.com',
+      fetch: mockFetch,
+    });
+
+    await sender.sendEmail(
+      'target@example.com',
+      '<p>Legacy HTML</p>',
+      'Legacy Subject',
+      'Target User',
+      'Legacy Plaintext',
+      'Custom Brand'
+    );
+
+    expect(capturedBody.to).toEqual([
+      { email_address: { address: 'target@example.com', name: 'Target User' } },
+    ]);
+    expect(capturedBody.from).toEqual({
+      address: 'from@domain.com',
+      name: 'Custom Brand',
+    });
+    expect(capturedBody.subject).toBe('Legacy Subject');
+    expect(capturedBody.htmlbody).toBe('<p>Legacy HTML</p>');
+    expect(capturedBody.textbody).toBe('Legacy Plaintext');
   });
 });

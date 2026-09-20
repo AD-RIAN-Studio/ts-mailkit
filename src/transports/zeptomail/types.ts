@@ -1,6 +1,6 @@
 import type { Recipient } from '../../core/types.js';
 
-export interface ZeptoMailConfig {
+export interface ZeptoMailHttpConfig {
   /**
    * Zoho ZeptoMail API host domain.
    * Examples: 'api.zeptomail.com', 'api.zeptomail.eu', 'api.zeptomail.in'
@@ -24,6 +24,12 @@ export interface ZeptoMailConfig {
    */
   fetch?: typeof fetch;
 }
+
+/**
+ * Configuration options for ZeptoMailHttpSender.
+ * @deprecated Use `ZeptoMailHttpConfig` instead. This alias will be removed in v1.0.0.
+ */
+export type ZeptoMailConfig = ZeptoMailHttpConfig;
 
 export interface ZeptoMailAddressObject {
   address: string;

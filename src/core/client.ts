@@ -1,6 +1,6 @@
 import type { IEmailSender } from '../transports/sender.interface.js';
 import type { IEmailRenderer, RenderedEmail } from '../renderers/renderer.interface.js';
-import { DefaultEmailRenderer } from '../renderers/default/default-renderer.js';
+import { DefaultEmailRenderer, buildPlainText } from '../renderers/default/default-renderer.js';
 import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
 import type { EmailTemplateDto } from '../templates/dto/index.js';
 import {
@@ -65,7 +65,7 @@ export interface SendTemplateOptions {
 
 export interface MailKitOptions {
   /**
-   * The transport adapter used to dispatch emails (e.g. ZeptoMailSender, MemoryEmailSender).
+   * The transport adapter used to dispatch emails (e.g. ZeptoMailHttpSender, MemoryEmailSender).
    */
   transport: IEmailSender;
   /**
@@ -123,6 +123,13 @@ export class MailKit {
   }
 
   /**
+   * Legacy positional send signature for backwards compatibility with 0.1.x:
+   * `send(to: string, template: EmailTemplateDto, toName?: string): Promise<SendResult>`
+   *
+   * @deprecated Use `send({ to, template, ... })` instead. This overload will be removed in v1.0.0.
+   */
+  async send(to: string, template: EmailTemplateDto, toName?: string): Promise<SendResult>;
+  /**
    * Sends an email using a strongly-typed template DTO.
    *
    * Example:
@@ -133,7 +140,21 @@ export class MailKit {
    * });
    * ```
    */
-  async send(options: SendTemplateOptions): Promise<SendResult> {
+  async send(options: SendTemplateOptions): Promise<SendResult>;
+  async send(
+    toOrOptions: string | SendTemplateOptions,
+    maybeTemplate?: EmailTemplateDto,
+    maybeToName?: string
+  ): Promise<SendResult> {
+    const options: SendTemplateOptions =
+      typeof toOrOptions === 'string'
+        ? {
+            to: toOrOptions,
+            template: maybeTemplate!,
+            toName: maybeToName,
+          }
+        : toOrOptions;
+
     const template = options.template;
     const recipientName = options.toName ?? template.userName;
 
@@ -194,6 +215,35 @@ export class MailKit {
       text,
     });
   }
+
+  /**
+   * Helper method matching legacy 0.1.x `sendSimpleMessage(to, subject, text, fromName?)`.
+   * @deprecated Use `sendRaw({ to, subject, text, ... })` instead. This method will be removed in v1.0.0.
+   */
+  async sendSimpleMessage(
+    to: string,
+    subject: string,
+    text: string,
+    fromName?: string
+  ): Promise<SendResult> {
+    return await this.sendRaw({
+      to,
+      subject,
+      text,
+      html: `<pre style="font-family:monospace;white-space:pre-wrap;">${text}</pre>`,
+      from: fromName && this.defaultFrom
+        ? { address: normalizeRecipient(this.defaultFrom).address, name: fromName }
+        : this.defaultFrom,
+    });
+  }
+
+  /**
+   * Legacy helper method to construct plain text from a template.
+   * @deprecated Use `render(template)` or `buildPlainText(dto)` instead. This method will be removed in v1.0.0.
+   */
+  buildPlainTextMessage(template: EmailTemplateDto): string {
+    return template.noHtmlMessage ?? buildPlainText(template);
+  }
 }
 
 /**
@@ -202,3 +252,10 @@ export class MailKit {
 export function createMailKit(options: MailKitOptions): MailKit {
   return new MailKit(options);
 }
+
+/**
+ * Backward-compatibility alias for `MailKit`.
+ * @deprecated Use `MailKit` instead. This alias will be removed in v1.0.0.
+ */
+export const EmailService = MailKit;
+export type EmailService = MailKit;

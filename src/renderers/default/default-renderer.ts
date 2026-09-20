@@ -20,6 +20,25 @@ export interface DefaultRendererOptions {
    * @default '600px'
    */
   maxWidth?: string;
+
+  /**
+   * Default logo URL displayed at the top-center of the email if not provided in the DTO.
+   * Must be a valid http(s) URL.
+   */
+  logoUrl?: string;
+}
+
+/**
+ * Validates whether a string is a valid HTTP or HTTPS URL.
+ */
+export function isValidHttpUrl(urlString?: string): boolean {
+  if (!urlString || typeof urlString !== 'string') return false;
+  try {
+    const url = new URL(urlString.trim());
+    return (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname.length > 0;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -81,6 +100,16 @@ export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions
     `<body style="margin:0;padding:24px 16px;background-color:#f9fafb;font-family:${fontFamily};color:#1f2937;line-height:1.6;">`,
     `<div style="max-width:${maxWidth};margin:0 auto;background-color:#ffffff;padding:32px 28px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.1);border:1px solid #f3f4f6;">`,
   ];
+
+  const logoCandidate = dto.logoUrl ?? options.logoUrl;
+  if (logoCandidate && isValidHttpUrl(logoCandidate)) {
+    const validLogo = logoCandidate.trim();
+    parts.push(
+      `<div style="margin-bottom:24px;text-align:center;">`,
+      `  <img src="${validLogo}" alt="${dto.fromName || 'Logo'}" style="max-height:48px;max-width:200px;height:auto;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;" />`,
+      `</div>`
+    );
+  }
 
   if (dto.imageUrl) {
     parts.push(

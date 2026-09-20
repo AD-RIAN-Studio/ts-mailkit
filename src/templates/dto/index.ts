@@ -4,6 +4,8 @@
 export interface EmailTemplateDto {
   /** Email subject line */
   subject: string;
+  /** Optional logo URL displayed top-center in the email. Must be a valid http(s) URL. */
+  logoUrl?: string;
   /** Primary headline/header in the email content */
   header?: string;
   /** Optional hero image URL displayed at the top */
@@ -44,6 +46,7 @@ export interface EmailVerificationParams {
   otp: string;
   brandName?: string;
   extraMessage?: string;
+  logoUrl?: string;
 }
 
 /**
@@ -55,6 +58,7 @@ export interface PasswordResetParams {
   otp?: string;
   brandName?: string;
   extraMessage?: string;
+  logoUrl?: string;
 }
 
 /**
@@ -66,6 +70,7 @@ export interface TwoFactorParams {
   magicLink?: string;
   brandName?: string;
   extraMessage?: string;
+  logoUrl?: string;
 }
 
 /**
@@ -76,6 +81,7 @@ export interface MagicLinkParams {
   magicLink: string;
   brandName?: string;
   extraMessage?: string;
+  logoUrl?: string;
 }
 
 /**
@@ -85,6 +91,7 @@ export interface NewsletterParams {
   subject: string;
   header: string;
   body: string;
+  logoUrl?: string;
   imageUrl?: string;
   actionUrl?: string;
   actionText?: string;
@@ -101,4 +108,5 @@ export interface SimpleMessageParams {
   body: string;
   brandName?: string;
   footer?: string;
+  logoUrl?: string;
 }

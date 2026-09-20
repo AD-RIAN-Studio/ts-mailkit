@@ -18,7 +18,9 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
   1. DTO schema and validation.
   2. Template building and responsive HTML rendering.
   3. Dispatch via the chosen transport adapter.
-- **Multitenant & Dynamic Branding**: Configure global branding or pass a dynamic brand name resolver for multi-tenant applications.
+- **Multitenant & Dynamic Branding**: Configure global branding, top-center logos, or pass a dynamic brand name resolver for multi-tenant applications.
+- **Top-Center Brand Logo**: Display your brand or company logo top-center with automatic HTTP(S) URL validation.
+- **Template Preview**: Inspect [`demo-newsletter.html`](demo-newsletter.html) directly in the root folder to view the responsive default email template before installing.
 - **Dual ESM & CommonJS**: Full support for `import` and `require` with first-class TypeScript declaration maps.
 
 ---
@@ -137,6 +139,7 @@ You can instantiate `EmailTemplateFactory` with brand-level defaults:
 ```ts
 const tenantFactory = new EmailTemplateFactory({
   brandName: 'St. Patrick High School',
+  logoUrl: 'https://school.edu/assets/logo.png',
   securityMessage: 'If you did not make this request, contact our school IT administration immediately.',
   footer: (brand) => `© ${new Date().getFullYear()} ${brand}. Authorized educational portal.`,
 });
@@ -235,6 +238,14 @@ export class CustomSmtpSender implements IEmailSender {
   }
 }
 ```
+
+---
+
+## Template Preview
+
+You can inspect what the default responsive email template looks like without writing code or installing the library:
+
+- 📄 **[demo-newsletter.html](demo-newsletter.html)** &mdash; Standalone, fully pre-rendered HTML newsletter showcasing top-center brand logo, hero banner, typography, call-to-action button, and footer. Generated automatically during the test suite.
 
 ---
 

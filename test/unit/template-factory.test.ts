@@ -91,13 +91,35 @@ describe('EmailTemplateFactory', () => {
         brandName: 'Custom Brand',
         securityMessage: 'Custom security notice.',
         footer: (brand) => `Custom Footer for ${brand}`,
+        logoUrl: 'https://brand.test/logo.png',
       });
 
       const dto = factory.createEmailVerification('User1', 'https://verify.url', '1234');
       expect(dto.header).toBe('Welcome to Custom Brand!');
       expect(dto.fromName).toBe('Custom Brand');
+      expect(dto.logoUrl).toBe('https://brand.test/logo.png');
       expect(dto.extraMessage).toBe('Custom security notice.');
       expect(dto.footer).toBe('Custom Footer for Custom Brand');
+    });
+
+    it('allows overriding logoUrl in createNewsLetter', () => {
+      const factory = new EmailTemplateFactory({
+        brandName: 'Custom Brand',
+        logoUrl: 'https://brand.test/default-logo.png',
+      });
+
+      const dto = factory.createNewsLetter(
+        'Newsletter',
+        'Head',
+        'Body',
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        'https://brand.test/custom-newsletter-logo.png'
+      );
+
+      expect(dto.logoUrl).toBe('https://brand.test/custom-newsletter-logo.png');
     });
   });
 });

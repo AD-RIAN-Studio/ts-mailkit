@@ -80,5 +80,77 @@ describe('Renderers & Utilities', () => {
       const text = buildPlainText(legacyDto);
       expect(text).toContain('Testing legacy alias compatibility');
     });
+
+    it('renders logo on top-center when a valid https url is provided', () => {
+      const dtoWithLogo: EmailTemplateDto = {
+        subject: 'Logo Test',
+        header: 'Hello',
+        body: 'Content',
+        logoUrl: 'https://cdn.example.com/logo.png',
+        fromName: 'Acme Corp',
+      };
+      const html = buildHtml(dtoWithLogo);
+      expect(html).toContain('<img src="https://cdn.example.com/logo.png" alt="Acme Corp"');
+      expect(html).toContain('max-height:48px;max-width:200px;');
+      // Assert logo comes before header
+      const logoIndex = html.indexOf('https://cdn.example.com/logo.png');
+      const headerIndex = html.indexOf('>Hello</h2>');
+      expect(logoIndex).toBeLessThan(headerIndex);
+    });
+
+    it('renders logo on top-center when a valid http url is provided', () => {
+      const dtoWithHttpLogo: EmailTemplateDto = {
+        subject: 'HTTP Logo',
+        header: 'Hello',
+        body: 'Content',
+        logoUrl: 'http://localhost:3000/logo.png',
+      };
+      const html = buildHtml(dtoWithHttpLogo);
+      expect(html).toContain('<img src="http://localhost:3000/logo.png"');
+    });
+
+    it('does NOT render logo if logoUrl is not a valid http(s) url', () => {
+      const invalidUrls = [
+        'ftp://example.com/logo.png',
+        'javascript:alert(1)',
+        'data:image/png;base64,1234',
+        'not-a-valid-url',
+        'file:///path/to/logo.png',
+        '',
+      ];
+
+      for (const invalidUrl of invalidUrls) {
+        const dto: EmailTemplateDto = {
+          subject: 'Invalid Logo',
+          body: 'Content',
+          logoUrl: invalidUrl,
+        };
+        const html = buildHtml(dto);
+        expect(html).not.toContain('<img src=');
+        if (invalidUrl) {
+          expect(html).not.toContain(invalidUrl);
+        }
+      }
+    });
+
+    it('falls back to options.logoUrl if dto.logoUrl is not provided', () => {
+      const dto: EmailTemplateDto = {
+        subject: 'Default Logo',
+        body: 'Content',
+      };
+      const html = buildHtml(dto, { logoUrl: 'https://brand.example.com/global-logo.svg' });
+      expect(html).toContain('<img src="https://brand.example.com/global-logo.svg"');
+    });
+
+    it('prefers dto.logoUrl over options.logoUrl', () => {
+      const dto: EmailTemplateDto = {
+        subject: 'Override Logo',
+        body: 'Content',
+        logoUrl: 'https://custom.example.com/custom.png',
+      };
+      const html = buildHtml(dto, { logoUrl: 'https://brand.example.com/global-logo.svg' });
+      expect(html).toContain('https://custom.example.com/custom.png');
+      expect(html).not.toContain('https://brand.example.com/global-logo.svg');
+    });
   });
 });

@@ -17,6 +17,11 @@ export interface BrandingConfig {
    * Optional custom footer generator or string.
    */
   footer?: string | ((brandName: string) => string);
+
+  /**
+   * Optional default logo URL to display top-center in templated emails.
+   */
+  logoUrl?: string;
 }
 
 const DEFAULT_SECURITY_MESSAGE =
@@ -33,10 +38,12 @@ export class EmailTemplateFactory {
   private readonly defaultBrandName: string;
   private readonly defaultSecurityMessage: string;
   private readonly footerResolver: (brandName: string) => string;
+  private readonly defaultLogoUrl?: string;
 
   constructor(config: BrandingConfig = {}) {
     this.defaultBrandName = config.brandName || 'Application';
     this.defaultSecurityMessage = config.securityMessage || DEFAULT_SECURITY_MESSAGE;
+    this.defaultLogoUrl = config.logoUrl;
     if (typeof config.footer === 'function') {
       this.footerResolver = config.footer;
     } else if (typeof config.footer === 'string') {
@@ -70,6 +77,7 @@ export class EmailTemplateFactory {
       subject: 'Verify Your Email Address',
       header: `Welcome to ${brand}!`,
       body,
+      logoUrl: this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: verificationUrl,
       actionText: 'Verify Email',
@@ -99,6 +107,7 @@ export class EmailTemplateFactory {
       subject: 'Password Reset Request',
       header: 'Reset Your Password',
       body,
+      logoUrl: this.defaultLogoUrl,
       otpCode: otp || undefined,
       actionUrl: resetUrl,
       actionText: 'Reset Password',
@@ -127,6 +136,7 @@ export class EmailTemplateFactory {
       subject,
       header,
       body,
+      logoUrl: this.defaultLogoUrl,
       footer: this.buildFooter(brand),
       fromName: brand,
       noHtmlMessage: htmlToPlainText(body),
@@ -143,7 +153,8 @@ export class EmailTemplateFactory {
     imageUrl?: string,
     actionUrl?: string,
     actionText?: string,
-    brandName?: string
+    brandName?: string,
+    logoUrl?: string
   ): EmailTemplateDto {
     const brand = this.resolveBrand(brandName);
     let noHtmlMessage = htmlToPlainText(body);
@@ -154,6 +165,7 @@ export class EmailTemplateFactory {
       subject,
       header,
       body,
+      logoUrl: logoUrl || this.defaultLogoUrl,
       imageUrl,
       actionUrl,
       actionText,
@@ -179,6 +191,7 @@ export class EmailTemplateFactory {
       subject: 'Your Login Verification Code',
       header: 'Two-Factor Authentication',
       body,
+      logoUrl: this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: magicLink || undefined,
       actionText: magicLink ? 'Verify Login' : undefined,
@@ -204,6 +217,7 @@ export class EmailTemplateFactory {
       subject: 'Your Magic Link',
       header: `Sign In to ${brand}`,
       body,
+      logoUrl: this.defaultLogoUrl,
       actionUrl: magicLink,
       actionText: 'Sign In',
       extraMessage: this.defaultSecurityMessage,
@@ -258,7 +272,8 @@ export class EmailTemplateFactory {
     imageUrl?: string,
     actionUrl?: string,
     actionText?: string,
-    brandName?: string
+    brandName?: string,
+    logoUrl?: string
   ): EmailTemplateDto {
     return this.defaultInstance.createNewsLetter(
       subject,
@@ -267,7 +282,8 @@ export class EmailTemplateFactory {
       imageUrl,
       actionUrl,
       actionText,
-      brandName
+      brandName,
+      logoUrl
     );
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "ts-mailkit",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Strictly typed, modular, and composable email composition and dispatch library for TypeScript and modern edge runtimes.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

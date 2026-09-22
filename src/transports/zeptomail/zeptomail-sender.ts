@@ -47,12 +47,14 @@ export class ZeptoMailHttpSender implements IEmailSender {
       throw new ConfigurationError('ZeptoMailHttpSender: Configured from address must not be empty.');
     }
 
-    this.fetchImpl = config.fetch ?? globalThis.fetch;
-    if (typeof this.fetchImpl !== 'function') {
+    const fetchImpl = config.fetch ?? globalThis.fetch;
+    if (typeof fetchImpl !== 'function') {
       throw new ConfigurationError(
         'ZeptoMailHttpSender: No global fetch implementation found. Pass a custom fetch to ZeptoMailHttpConfig if running on Node < 18.'
       );
     }
+    // Bind: detached fetch throws "Illegal invocation" on strict-this runtimes (undici/workerd).
+    this.fetchImpl = fetchImpl.bind(globalThis);
   }
 
   /**

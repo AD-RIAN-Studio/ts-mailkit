@@ -1,9 +1,11 @@
 # Plan: `ts-mailkit` Architecture & Library Foundation
 
 ## Summary
+
 `ts-mailkit` is a modular, zero-runtime-dependency (core), TypeScript-first email library designed to abstract email composition, templating, and dispatch via strictly typed Data Transfer Objects (DTOs) and pluggable transport adapters (`IEmailSender`).
 
 This plan aligns the repository tooling with [`ad-rian-studio-ai`](/home/adrian/CodeSpace/Projects/NodeJs/ad-rian-studio-ai):
+
 - `pnpm@11.22.0` with `pnpm-workspace.yaml`
 - `tsup` dual ESM/CJS build with `tsc --emitDeclarationOnly`
 - Strict `tsconfig.json` with NodeNext resolution and ES2022 target
@@ -13,6 +15,7 @@ This plan aligns the repository tooling with [`ad-rian-studio-ai`](/home/adrian/
 ---
 
 ## Scope
+
 - **In-Scope**:
   - Scaffolding matching `ad-rian-studio-ai` (`package.json`, `pnpm-workspace.yaml`, `tsconfig.json`, `tsup.config.ts`, `vitest.config.ts`, `.gitignore`).
   - Core domain models: `EmailEnvelope`, `Recipient`, `SendMailOptions`, `SendResult`, and error hierarchy.
@@ -37,53 +40,59 @@ This plan aligns the repository tooling with [`ad-rian-studio-ai`](/home/adrian/
 ## Implementation Steps
 
 ### Phase 1: Tooling, Scaffolding & Configuration
+
 1. Initialize Package Manifest & Configuration
-   - *Details*: Create `package.json`, `pnpm-workspace.yaml`, `tsconfig.json`, `tsup.config.ts`, `vitest.config.ts`, `.gitignore` matching `ad-rian-studio-ai`.
-   - *Dependencies*: None
+   - _Details_: Create `package.json`, `pnpm-workspace.yaml`, `tsconfig.json`, `tsup.config.ts`, `vitest.config.ts`, `.gitignore` matching `ad-rian-studio-ai`.
+   - _Dependencies_: None
 2. Install Dependencies via `pnpm install`
-   - *Dependencies*: Step 1
+   - _Dependencies_: Step 1
 
 ### Phase 2: Core Types, Contracts & Transport Interface
+
 3. Define Core Messaging Types & Errors
-   - *Details*: `src/core/types.ts`, `src/core/errors.ts`.
-   - *Dependencies*: Step 2
+   - _Details_: `src/core/types.ts`, `src/core/errors.ts`.
+   - _Dependencies_: Step 2
 4. Define Transport Contract & Implement Built-in Transports
-   - *Details*: `IEmailSender`, `ZeptoMailSender` (native `fetch`, Zoho HTTP API), `MemoryEmailSender`, `ConsoleEmailSender`.
-   - *Dependencies*: Step 3
+   - _Details_: `IEmailSender`, `ZeptoMailSender` (native `fetch`, Zoho HTTP API), `MemoryEmailSender`, `ConsoleEmailSender`.
+   - _Dependencies_: Step 3
 
 ### Phase 3: DTOs, Templates & Renderers
+
 5. Implement Strongly-Typed DTOs
-   - *Details*: `src/templates/dto/` (Verification, Reset, 2FA, MagicLink, Newsletter, SimpleMessage, BaseEmailDto).
-   - *Dependencies*: Step 3
+   - _Details_: `src/templates/dto/` (Verification, Reset, 2FA, MagicLink, Newsletter, SimpleMessage, BaseEmailDto).
+   - _Dependencies_: Step 3
 6. Implement Email Renderer & Plaintext Helpers
-   - *Details*: `IEmailRenderer`, `DefaultEmailRenderer`, `htmlToPlainText`.
-   - *Dependencies*: Step 5
+   - _Details_: `IEmailRenderer`, `DefaultEmailRenderer`, `htmlToPlainText`.
+   - _Dependencies_: Step 5
 7. Implement Configurable Template Factory
-   - *Details*: `EmailTemplateFactory` with branding context support.
-   - *Dependencies*: Steps 5, 6
+   - _Details_: `EmailTemplateFactory` with branding context support.
+   - _Dependencies_: Steps 5, 6
 
 ### Phase 4: Main Service Facade & Entrypoint
+
 8. Implement Service Orchestration Client
-   - *Details*: `MailKit` (`createMailKit`, `EmailService` alias) with high-level `send` (DTO-driven) and `sendRaw`.
-   - *Dependencies*: Steps 4, 6, 7
+   - _Details_: `MailKit` (`createMailKit`, `EmailService` alias) with high-level `send` (DTO-driven) and `sendRaw`.
+   - _Dependencies_: Steps 4, 6, 7
 9. Module Entrypoint & Public Exports
-   - *Details*: `src/index.ts` exporting public API.
-   - *Dependencies*: Step 8
+   - _Details_: `src/index.ts` exporting public API.
+   - _Dependencies_: Step 8
 10. Documentation
-    - *Details*: Write `README.md` with usage examples matching `ad-rian-studio-ai` format.
-    - *Dependencies*: Step 9
+    - _Details_: Write `README.md` with usage examples matching `ad-rian-studio-ai` format.
+    - _Dependencies_: Step 9
 
 ### Phase 5: Testing & Verification
+
 11. Unit Test Suite in `test/unit/`
-    - *Details*: Tests for `ZeptoMailSender`, `MemoryEmailSender`, `EmailTemplateFactory`, `DefaultEmailRenderer`, `MailKit`.
-    - *Dependencies*: Steps 8, 9
+    - _Details_: Tests for `ZeptoMailSender`, `MemoryEmailSender`, `EmailTemplateFactory`, `DefaultEmailRenderer`, `MailKit`.
+    - _Dependencies_: Steps 8, 9
 12. Build & Typecheck Verification
-    - *Details*: Run `pnpm run typecheck`, `pnpm run test:unit`, and `pnpm run build`.
-    - *Dependencies*: Step 11
+    - _Details_: Run `pnpm run typecheck`, `pnpm run test:unit`, and `pnpm run build`.
+    - _Dependencies_: Step 11
 
 ---
 
 ## Verification Plan
+
 1. **Automated Tests**:
    - `pnpm test:unit`: Vitest test suite.
    - `pnpm run typecheck`: TypeScript compilation check (`tsc --noEmit`).

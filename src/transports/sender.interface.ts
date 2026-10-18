@@ -1,4 +1,4 @@
-import type { SendMailOptions, SendResult } from '../core/types.js';
+import type { SendMailOptions, SendResult } from "../core/types.js";
 
 /**
  * Contract that every concrete email sender/transport must satisfy.

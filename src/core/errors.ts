@@ -4,7 +4,7 @@
 export class MailKitError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'MailKitError';
+    this.name = "MailKitError";
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
@@ -15,7 +15,7 @@ export class MailKitError extends Error {
 export class ConfigurationError extends MailKitError {
   constructor(message: string) {
     super(message);
-    this.name = 'ConfigurationError';
+    this.name = "ConfigurationError";
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
@@ -36,10 +36,10 @@ export class TransportError extends MailKitError {
       statusCode?: number;
       responseBody?: string;
       cause?: unknown;
-    }
+    },
   ) {
     super(message);
-    this.name = 'TransportError';
+    this.name = "TransportError";
     this.transportName = options.transportName;
     this.statusCode = options.statusCode;
     this.responseBody = options.responseBody;
@@ -54,7 +54,7 @@ export class TransportError extends MailKitError {
 export class TemplateError extends MailKitError {
   constructor(message: string) {
     super(message);
-    this.name = 'TemplateError';
+    this.name = "TemplateError";
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }

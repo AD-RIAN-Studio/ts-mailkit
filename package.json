@@ -2,11 +2,36 @@
   "name": "ts-mailkit",
   "version": "2.0.1",
   "description": "Strictly typed, modular, and composable email composition and dispatch library for TypeScript and modern edge runtimes.",
+  "keywords": [
+    "dto",
+    "edge",
+    "email",
+    "mailer",
+    "transactional-email",
+    "typescript",
+    "workerd",
+    "zeptomail",
+    "zoho-mail"
+  ],
+  "homepage": "https://github.com/AD-RIAN-Studio/ts-mailkit#readme",
+  "bugs": {
+    "url": "https://github.com/AD-RIAN-Studio/ts-mailkit/issues"
+  },
+  "license": "MIT",
+  "author": "AD-RIAN Studio",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AD-RIAN-Studio/ts-mailkit.git"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "type": "module",
-  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -17,46 +42,23 @@
   "publishConfig": {
     "access": "public"
   },
-  "packageManager": "pnpm@11.22.0",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AD-RIAN-Studio/ts-mailkit.git"
-  },
-  "bugs": {
-    "url": "https://github.com/AD-RIAN-Studio/ts-mailkit/issues"
-  },
-  "homepage": "https://github.com/AD-RIAN-Studio/ts-mailkit#readme",
-  "files": [
-    "dist",
-    "README.md"
-  ],
   "scripts": {
-    "build": "tsdown && tsc --emitDeclarationOnly",
-    "dev": "tsdown --watch",
+    "build": "vp pack && tsc --emitDeclarationOnly",
+    "dev": "vp pack --watch",
+    "check": "vp check",
+    "check:fix": "vp check --fix",
+    "lint": "vp lint",
+    "format": "vp fmt",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run test/unit",
-    "test:unit": "vitest run test/unit",
-    "test:watch": "vitest test/unit",
-    "prepublishOnly": "pnpm run build && pnpm run test:unit"
+    "test": "vp test run test/unit",
+    "test:unit": "vp test run test/unit",
+    "test:watch": "vp test test/unit",
+    "prepublishOnly": "pnpm run check && pnpm run typecheck && pnpm run test:unit && pnpm run build"
   },
-  "keywords": [
-    "email",
-    "mailer",
-    "zeptomail",
-    "zoho-mail",
-    "typescript",
-    "dto",
-    "transactional-email",
-    "edge",
-    "workerd"
-  ],
-  "author": "AD-RIAN Studio",
-  "license": "MIT",
   "devDependencies": {
     "@types/node": "^26.1.1",
-    "tsdown": "^0.23.0",
     "tsx": "^4.19.3",
     "typescript": "^7.0.2",
-    "vitest": "^3.0.7"
+    "vite-plus": "catalog:"
   }
 }

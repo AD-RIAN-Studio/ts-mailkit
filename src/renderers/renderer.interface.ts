@@ -1,4 +1,4 @@
-import type { EmailTemplateDto } from '../templates/dto/index.js';
+import type { EmailTemplateDto } from "../templates/dto/index.js";
 
 /**
  * Output of an email rendering process.

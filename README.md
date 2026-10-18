@@ -52,19 +52,19 @@ bun add ts-mailkit
 ### 1. Initialize Transport & Client
 
 ```ts
-import { createMailKit, ZeptoMailHttpSender, EmailTemplateFactory } from 'ts-mailkit';
+import { createMailKit, ZeptoMailHttpSender, EmailTemplateFactory } from "ts-mailkit";
 
 // Configure the Zoho ZeptoMail HTTP transport
 const transport = new ZeptoMailHttpSender({
   apiToken: process.env.ZEPTO_MAIL_TOKEN!,
-  apiHost: 'api.zeptomail.com', // or 'api.zeptomail.eu', 'api.zeptomail.in'
-  from: { address: 'noreply@yourdomain.com', name: 'Acme App' },
+  apiHost: "api.zeptomail.com", // or 'api.zeptomail.eu', 'api.zeptomail.in'
+  from: { address: "noreply@yourdomain.com", name: "Acme App" },
 });
 
 // Initialize the MailKit client
 const mailer = createMailKit({
   transport,
-  defaultBrandName: 'Acme App',
+  defaultBrandName: "Acme App",
 });
 ```
 
@@ -73,14 +73,14 @@ const mailer = createMailKit({
 ```ts
 // 1. Create a strongly typed email verification DTO
 const verificationEmail = EmailTemplateFactory.createEmailVerification({
-  username: 'Alex',
-  verificationUrl: 'https://app.example.com/verify?token=xyz123',
-  otp: '482910',
+  username: "Alex",
+  verificationUrl: "https://app.example.com/verify?token=xyz123",
+  otp: "482910",
 });
 
 // 2. Dispatch via MailKit
 await mailer.send({
-  to: 'alex@example.com',
+  to: "alex@example.com",
   template: verificationEmail,
 });
 ```
@@ -94,43 +94,43 @@ await mailer.send({
 `EmailTemplateFactory` provides type-safe constructors for standard transactional patterns:
 
 ```ts
-import { EmailTemplateFactory } from 'ts-mailkit';
+import { EmailTemplateFactory } from "ts-mailkit";
 
 // Email Verification with OTP
 const verifyDto = EmailTemplateFactory.createEmailVerification({
-  username: 'Jordan',
-  verificationUrl: 'https://app.com/verify?token=abc',
-  otp: '123456',
+  username: "Jordan",
+  verificationUrl: "https://app.com/verify?token=abc",
+  otp: "123456",
 });
 
 // Password Reset
 const resetDto = EmailTemplateFactory.createPasswordReset({
-  username: 'Jordan',
-  resetUrl: 'https://app.com/reset?token=abc',
-  otp: '654321',
+  username: "Jordan",
+  resetUrl: "https://app.com/reset?token=abc",
+  otp: "654321",
 });
 
 // Two-Factor Authentication (2FA)
 const twoFactorDto = EmailTemplateFactory.create2FAEmail({
-  username: 'Jordan',
-  otp: '987654',
-  magicLink: 'https://app.com/2fa/magic?token=abc',
+  username: "Jordan",
+  otp: "987654",
+  magicLink: "https://app.com/2fa/magic?token=abc",
 });
 
 // Magic Link Sign-in
 const magicLinkDto = EmailTemplateFactory.createMagicLinkEmail({
-  username: 'Jordan',
-  magicLink: 'https://app.com/auth/magic?token=abc',
+  username: "Jordan",
+  magicLink: "https://app.com/auth/magic?token=abc",
 });
 
 // Newsletter / Announcement
 const newsDto = EmailTemplateFactory.createNewsLetter({
-  subject: 'Product Update - Fall 2026',
-  header: 'Introducing New Features',
-  body: 'Here is what our team shipped this month.',
-  imageUrl: 'https://cdn.example.com/hero.png',
-  actionUrl: 'https://app.com/blog/update',
-  actionText: 'Read Release Notes',
+  subject: "Product Update - Fall 2026",
+  header: "Introducing New Features",
+  body: "Here is what our team shipped this month.",
+  imageUrl: "https://cdn.example.com/hero.png",
+  actionUrl: "https://app.com/blog/update",
+  actionText: "Read Release Notes",
 });
 ```
 
@@ -140,16 +140,17 @@ You can instantiate `EmailTemplateFactory` with brand-level defaults:
 
 ```ts
 const tenantFactory = new EmailTemplateFactory({
-  brandName: 'St. Patrick High School',
-  logoUrl: 'https://school.edu/assets/logo.png',
-  securityMessage: 'If you did not make this request, contact our school IT administration immediately.',
+  brandName: "St. Patrick High School",
+  logoUrl: "https://school.edu/assets/logo.png",
+  securityMessage:
+    "If you did not make this request, contact our school IT administration immediately.",
   footer: (brand) => `© ${new Date().getFullYear()} ${brand}. Authorized educational portal.`,
 });
 
 const studentEmail = tenantFactory.createEmailVerification({
-  username: 'Student',
-  verificationUrl: 'https://school.edu/verify',
-  otp: '554433',
+  username: "Student",
+  verificationUrl: "https://school.edu/verify",
+  otp: "554433",
 });
 ```
 
@@ -158,10 +159,10 @@ Or pass a dynamic tenant resolver to `MailKit`:
 ```ts
 const mailer = createMailKit({
   transport,
-  defaultFrom: 'notifications@portal.edu',
+  defaultFrom: "notifications@portal.edu",
   brandNameResolver: async () => {
     // Dynamically retrieve active tenant brand from request context or DB
-    return 'Springfield Academy';
+    return "Springfield Academy";
   },
 });
 ```
@@ -171,10 +172,10 @@ const mailer = createMailKit({
 Easily write unit and integration tests without hitting third-party APIs or mocking network sockets:
 
 ```ts
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createMailKit, MemoryEmailSender, EmailTemplateFactory } from 'ts-mailkit';
+import { describe, it, expect, beforeEach } from "vitest";
+import { createMailKit, MemoryEmailSender, EmailTemplateFactory } from "ts-mailkit";
 
-describe('User Registration Email', () => {
+describe("User Registration Email", () => {
   let memoryTransport: MemoryEmailSender;
   let mailer: ReturnType<typeof createMailKit>;
 
@@ -183,20 +184,20 @@ describe('User Registration Email', () => {
     mailer = createMailKit({ transport: memoryTransport });
   });
 
-  it('sends verification code to the registered user', async () => {
+  it("sends verification code to the registered user", async () => {
     const dto = EmailTemplateFactory.createEmailVerification({
-      username: 'Sam',
-      verificationUrl: 'https://app.com/verify?token=123',
-      otp: '889900',
+      username: "Sam",
+      verificationUrl: "https://app.com/verify?token=123",
+      otp: "889900",
     });
 
-    await mailer.send({ to: 'sam@example.com', template: dto });
+    await mailer.send({ to: "sam@example.com", template: dto });
 
     expect(memoryTransport.count()).toBe(1);
     const sent = memoryTransport.getLastMail();
-    expect(sent?.subject).toBe('Verify Your Email Address');
-    expect(sent?.html).toContain('889900');
-    expect(sent?.text).toContain('Your verification code is: 889900');
+    expect(sent?.subject).toBe("Verify Your Email Address");
+    expect(sent?.html).toContain("889900");
+    expect(sent?.text).toContain("Your verification code is: 889900");
   });
 });
 ```
@@ -207,15 +208,15 @@ For custom HTML or plain-text messages. When `text` is omitted, an accessible pl
 
 ```ts
 await mailer.sendRaw({
-  to: [{ address: 'support@example.com', name: 'Support Team' }],
-  subject: 'Urgent System Alert',
-  html: '<h1>System Alert</h1><p>Database failover completed successfully.</p>',
+  to: [{ address: "support@example.com", name: "Support Team" }],
+  subject: "Urgent System Alert",
+  html: "<h1>System Alert</h1><p>Database failover completed successfully.</p>",
   // text is optional — auto-converted from html if omitted
   attachments: [
     {
-      filename: 'report.txt',
-      content: 'Database log summary...',
-      mimeType: 'text/plain',
+      filename: "report.txt",
+      content: "Database log summary...",
+      mimeType: "text/plain",
     },
   ],
 });
@@ -226,12 +227,12 @@ await mailer.sendRaw({
 If your application receives combined address strings like `"Jane Doe <jane@example.com>"`, use the standalone, tree-shakeable `parseEmailAddress` helper:
 
 ```ts
-import { parseEmailAddress } from 'ts-mailkit';
+import { parseEmailAddress } from "ts-mailkit";
 
-const recipient = parseEmailAddress('Jane Doe <jane@example.com>');
+const recipient = parseEmailAddress("Jane Doe <jane@example.com>");
 // => { address: 'jane@example.com', name: 'Jane Doe' }
 
-const simple = parseEmailAddress('jane@example.com');
+const simple = parseEmailAddress("jane@example.com");
 // => { address: 'jane@example.com' }
 ```
 
@@ -240,16 +241,16 @@ const simple = parseEmailAddress('jane@example.com');
 You can implement custom transports (e.g. SMTP, Resend, SendGrid, Postmark) by satisfying the `IEmailSender` interface:
 
 ```ts
-import type { IEmailSender, SendMailOptions, SendResult } from 'ts-mailkit';
+import type { IEmailSender, SendMailOptions, SendResult } from "ts-mailkit";
 
 export class CustomSmtpSender implements IEmailSender {
-  readonly name = 'smtp';
+  readonly name = "smtp";
 
   async send(options: SendMailOptions): Promise<SendResult> {
     // Custom dispatch logic using your preferred protocol or client
     return {
       success: true,
-      messageId: 'custom-id-123',
+      messageId: "custom-id-123",
     };
   }
 }

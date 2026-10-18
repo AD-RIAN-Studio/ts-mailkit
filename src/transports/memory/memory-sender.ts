@@ -1,12 +1,12 @@
-import type { SendMailOptions, SendResult } from '../../core/types.js';
-import type { IEmailSender } from '../sender.interface.js';
+import type { SendMailOptions, SendResult } from "../../core/types.js";
+import type { IEmailSender } from "../sender.interface.js";
 
 /**
  * In-memory email sender for automated testing, local development, and CI environments.
  * Captures all dispatched emails and provides inspection methods.
  */
 export class MemoryEmailSender implements IEmailSender {
-  readonly name = 'memory';
+  readonly name = "memory";
 
   private sentMails: SendMailOptions[] = [];
   private nextId = 1;
@@ -32,9 +32,7 @@ export class MemoryEmailSender implements IEmailSender {
    * Returns the most recent email sent, or undefined if no emails have been sent.
    */
   getLastMail(): SendMailOptions | undefined {
-    return this.sentMails.length > 0
-      ? { ...this.sentMails[this.sentMails.length - 1] }
-      : undefined;
+    return this.sentMails.length > 0 ? { ...this.sentMails[this.sentMails.length - 1] } : undefined;
   }
 
   /**

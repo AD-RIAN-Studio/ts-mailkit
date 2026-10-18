@@ -1,6 +1,7 @@
 # AGENTS.md
 
 ## Project Overview
+
 `ts-mailkit` is a modular, zero-runtime-dependency TypeScript library for email composition and dispatch via strictly typed Data Transfer Objects (DTOs) and pluggable `IEmailSender` transports.
 
 - **Target runtimes**: Universal (Node.js 18+, Cloudflare Workers `workerd`, Bun, Deno, Next.js Edge).
@@ -13,20 +14,24 @@
 
 ## Essential Commands
 
-Always use `pnpm` (`pnpm@11.22.0` enforced in `packageManager`):
+Always use `pnpm`:
 
+- **Format & Lint Check**: `pnpm run check` (`vp check`) or `pnpm run check:fix`
+- **Lint**: `pnpm run lint` (`vp lint`)
+- **Format**: `pnpm run format` (`vp fmt`)
 - **Typecheck**: `pnpm run typecheck` (`tsc --noEmit`)
-- **Unit Tests (all)**: `pnpm test:unit`
-- **Unit Test (single file)**: `pnpm vitest run test/unit/client.test.ts`
-- **Unit Test (name pattern)**: `pnpm vitest run test/unit/client.test.ts -t "legacy positional"`
-- **Watch Tests**: `pnpm run test:watch`
-- **Build**: `pnpm run build` (`tsdown && tsc --emitDeclarationOnly`)
+- **Unit & Contract Tests (all)**: `pnpm test:unit` (`vp test run test/unit`)
+- **Unit Test (single file)**: `pnpm run test:unit test/unit/client.test.ts`
+- **Watch Tests**: `pnpm run test:watch` (`vp test test/unit`)
+- **Build**: `pnpm run build` (`vp pack && tsc --emitDeclarationOnly`)
 - **Prepublish Check**: `pnpm run prepublishOnly`
 
 ### Verification Sequence
+
 When verifying code changes, execute in this order:
+
 ```bash
-pnpm run typecheck && pnpm test:unit && pnpm run build
+pnpm run check && pnpm run typecheck && pnpm test:unit && pnpm run build
 ```
 
 ---

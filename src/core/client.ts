@@ -1,16 +1,15 @@
-import type { IEmailSender } from '../transports/sender.interface.js';
-import type { IEmailRenderer, RenderedEmail } from '../renderers/renderer.interface.js';
-import { DefaultEmailRenderer } from '../renderers/default/default-renderer.js';
-import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
-import type { EmailTemplateDto } from '../templates/dto/index.js';
+import type { IEmailSender } from "../transports/sender.interface.js";
+import type { IEmailRenderer, RenderedEmail } from "../renderers/renderer.interface.js";
+import { DefaultEmailRenderer } from "../renderers/default/default-renderer.js";
+import { htmlToPlainText } from "../renderers/utils/html-to-plaintext.js";
+import type { EmailTemplateDto } from "../templates/dto/index.js";
 import {
   normalizeRecipient,
-  normalizeRecipients,
   type Recipient,
   type SendMailOptions,
   type SendResult,
-} from './types.js';
-import { ConfigurationError } from './errors.js';
+} from "./types.js";
+import { ConfigurationError } from "./errors.js";
 
 export interface SendTemplateOptions {
   /**
@@ -48,7 +47,7 @@ export interface SendTemplateOptions {
   /**
    * Optional file attachments.
    */
-  attachments?: SendMailOptions['attachments'];
+  attachments?: SendMailOptions["attachments"];
   /**
    * Optional custom headers.
    */
@@ -99,7 +98,7 @@ export class MailKit {
 
   constructor(options: MailKitOptions) {
     if (!options.transport) {
-      throw new ConfigurationError('MailKit: A transport adapter (IEmailSender) is required.');
+      throw new ConfigurationError("MailKit: A transport adapter (IEmailSender) is required.");
     }
     this.transport = options.transport;
     this.renderer = options.renderer ?? new DefaultEmailRenderer();
@@ -152,7 +151,7 @@ export class MailKit {
 
     // Format recipients
     let toRecipients: Recipient | Recipient[];
-    if (typeof options.to === 'string' && recipientName) {
+    if (typeof options.to === "string" && recipientName) {
       toRecipients = { address: options.to, name: recipientName };
     } else {
       toRecipients = options.to;

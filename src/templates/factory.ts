@@ -1,5 +1,13 @@
-import type { EmailTemplateDto, EmailVerificationParams, MagicLinkParams, NewsletterParams, PasswordResetParams, SimpleMessageParams, TwoFactorParams,} from './dto/index.js';
-import { htmlToPlainText } from '../renderers/utils/html-to-plaintext.js';
+import type {
+  EmailTemplateDto,
+  EmailVerificationParams,
+  MagicLinkParams,
+  NewsletterParams,
+  PasswordResetParams,
+  SimpleMessageParams,
+  TwoFactorParams,
+} from "./dto/index.js";
+import { htmlToPlainText } from "../renderers/utils/html-to-plaintext.js";
 
 export interface BrandingConfig {
   /**
@@ -25,7 +33,7 @@ export interface BrandingConfig {
 }
 
 const DEFAULT_SECURITY_MESSAGE =
-  'If you did not request this, please ignore this email or contact support if you have concerns.';
+  "If you did not request this, please ignore this email or contact support if you have concerns.";
 
 function defaultFooter(brandName: string): string {
   return `&copy; ${new Date().getFullYear()} ${brandName}. All rights reserved.`;
@@ -41,12 +49,12 @@ export class EmailTemplateFactory {
   private readonly defaultLogoUrl?: string;
 
   constructor(config: BrandingConfig = {}) {
-    this.defaultBrandName = config.brandName || 'Application';
+    this.defaultBrandName = config.brandName || "Application";
     this.defaultSecurityMessage = config.securityMessage || DEFAULT_SECURITY_MESSAGE;
     this.defaultLogoUrl = config.logoUrl;
-    if (typeof config.footer === 'function') {
+    if (typeof config.footer === "function") {
       this.footerResolver = config.footer;
-    } else if (typeof config.footer === 'string') {
+    } else if (typeof config.footer === "string") {
       const fixedFooter = config.footer;
       this.footerResolver = () => fixedFooter;
     } else {
@@ -70,13 +78,13 @@ export class EmailTemplateFactory {
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Thank you for signing up. Use the code below or click the button to verify your email address.`;
     return {
-      subject: 'Verify Your Email Address',
+      subject: "Verify Your Email Address",
       header: `Welcome to ${brand}!`,
       body,
       logoUrl: this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: verificationUrl,
-      actionText: 'Verify Email',
+      actionText: "Verify Email",
       extraMessage: this.defaultSecurityMessage,
       footer: this.buildFooter(brand),
       userName: username,
@@ -91,18 +99,18 @@ export class EmailTemplateFactory {
    * Password-reset email with an optional OTP code and action link.
    */
   createPasswordReset(params: PasswordResetParams): EmailTemplateDto {
-    const { username, resetUrl, otp = '', brandName } = params;
+    const { username, resetUrl, otp = "", brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>We received a request to reset your password. Use the OTP code below or click the button to proceed.`;
-    const plainTextOtp = otp ? `\n\nYour OTP code is: ${otp}` : '';
+    const plainTextOtp = otp ? `\n\nYour OTP code is: ${otp}` : "";
     return {
-      subject: 'Password Reset Request',
-      header: 'Reset Your Password',
+      subject: "Password Reset Request",
+      header: "Reset Your Password",
       body,
       logoUrl: this.defaultLogoUrl,
       otpCode: otp || undefined,
       actionUrl: resetUrl,
-      actionText: 'Reset Password',
+      actionText: "Reset Password",
       extraMessage: this.defaultSecurityMessage,
       footer: this.buildFooter(brand),
       userName: username,
@@ -139,7 +147,7 @@ export class EmailTemplateFactory {
     const brand = this.resolveBrand(brandName);
     let noHtmlMessage = htmlToPlainText(body);
     if (actionUrl) {
-      noHtmlMessage += `\n\n${actionText || 'Learn more'}: ${actionUrl}`;
+      noHtmlMessage += `\n\n${actionText || "Learn more"}: ${actionUrl}`;
     }
     return {
       subject,
@@ -159,18 +167,18 @@ export class EmailTemplateFactory {
    * Two-factor authentication email with OTP code and optional magic link.
    */
   create2FAEmail(params: TwoFactorParams): EmailTemplateDto {
-    const { username, otp, magicLink = '', brandName } = params;
+    const { username, otp, magicLink = "", brandName } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Use the code below or click the button to complete your login.`;
-    const plainLink = magicLink ? `\n\nAlternatively, verify here:\n${magicLink}` : '';
+    const plainLink = magicLink ? `\n\nAlternatively, verify here:\n${magicLink}` : "";
     return {
-      subject: 'Your Login Verification Code',
-      header: 'Two-Factor Authentication',
+      subject: "Your Login Verification Code",
+      header: "Two-Factor Authentication",
       body,
       logoUrl: this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: magicLink || undefined,
-      actionText: magicLink ? 'Verify Login' : undefined,
+      actionText: magicLink ? "Verify Login" : undefined,
       extraMessage: this.defaultSecurityMessage,
       footer: this.buildFooter(brand),
       userName: username,
@@ -187,12 +195,12 @@ export class EmailTemplateFactory {
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Click the button below to sign in. No password needed.`;
     return {
-      subject: 'Your Magic Link',
+      subject: "Your Magic Link",
       header: `Sign In to ${brand}`,
       body,
       logoUrl: this.defaultLogoUrl,
       actionUrl: magicLink,
-      actionText: 'Sign In',
+      actionText: "Sign In",
       extraMessage: this.defaultSecurityMessage,
       footer: this.buildFooter(brand),
       userName: username,

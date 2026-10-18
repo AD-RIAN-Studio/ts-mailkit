@@ -11,10 +11,7 @@ export interface EmailAddress {
  * EmailAddress ({ address: 'user@example.com', name: 'User' }),
  * or legacy/standard object ({ email: 'user@example.com', name: 'User' }).
  */
-export type Recipient =
-  | string
-  | EmailAddress
-  | { email: string; name?: string };
+export type Recipient = string | EmailAddress | { email: string; name?: string };
 
 /**
  * Parses an RFC 5322 formatted address string into an EmailAddress.
@@ -24,8 +21,8 @@ export type Recipient =
  * - "\"Sender Name\" <sender@example.com>" -> { name: "Sender Name", address: "sender@example.com" }
  */
 export function parseEmailAddress(input: string): EmailAddress {
-  if (!input || typeof input !== 'string') {
-    return { address: '' };
+  if (!input || typeof input !== "string") {
+    return { address: "" };
   }
   const trimmed = input.trim();
   const match = trimmed.match(/^(?:["']?([^"']+)["']?\s+)?<?([^\s<>@]+@[^\s<>@]+)>?$/);
@@ -42,17 +39,17 @@ export function parseEmailAddress(input: string): EmailAddress {
  * Normalizes a Recipient value into a standardized EmailAddress.
  */
 export function normalizeRecipient(recipient: Recipient): EmailAddress {
-  if (typeof recipient === 'string') {
+  if (typeof recipient === "string") {
     return { address: recipient.trim() };
   }
-  if ('email' in recipient) {
+  if ("email" in recipient) {
     return {
-      address: (recipient.email ?? '').trim(),
+      address: (recipient.email ?? "").trim(),
       name: recipient.name?.trim(),
     };
   }
   return {
-    address: (recipient.address ?? '').trim(),
+    address: (recipient.address ?? "").trim(),
     name: recipient.name?.trim(),
   };
 }
@@ -60,9 +57,7 @@ export function normalizeRecipient(recipient: Recipient): EmailAddress {
 /**
  * Normalizes a single or array of Recipients into an array of EmailAddress.
  */
-export function normalizeRecipients(
-  recipients?: Recipient | Recipient[]
-): EmailAddress[] {
+export function normalizeRecipients(recipients?: Recipient | Recipient[]): EmailAddress[] {
   if (!recipients) return [];
   const list = Array.isArray(recipients) ? recipients : [recipients];
   return list.map(normalizeRecipient).filter((r) => r.address.length > 0);

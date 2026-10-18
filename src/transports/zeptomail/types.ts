@@ -1,4 +1,4 @@
-import type { Recipient } from '../../core/types.js';
+import type { Recipient } from "../../core/types.js";
 
 export interface ZeptoMailHttpConfig {
   /**

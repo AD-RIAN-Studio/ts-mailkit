@@ -1,6 +1,6 @@
-import type { EmailTemplateDto } from '../../templates/dto/index.js';
-import type { IEmailRenderer, RenderedEmail } from '../renderer.interface.js';
-import { htmlToPlainText } from '../utils/html-to-plaintext.js';
+import type { EmailTemplateDto } from "../../templates/dto/index.js";
+import type { IEmailRenderer, RenderedEmail } from "../renderer.interface.js";
+import { htmlToPlainText } from "../utils/html-to-plaintext.js";
 
 export interface DefaultRendererOptions {
   /**
@@ -32,10 +32,10 @@ export interface DefaultRendererOptions {
  * Validates whether a string is a valid HTTP or HTTPS URL.
  */
 export function isValidHttpUrl(urlString?: string): boolean {
-  if (!urlString || typeof urlString !== 'string') return false;
+  if (!urlString || typeof urlString !== "string") return false;
   try {
     const url = new URL(urlString.trim());
-    return (url.protocol === 'http:' || url.protocol === 'https:') && url.hostname.length > 0;
+    return (url.protocol === "http:" || url.protocol === "https:") && url.hostname.length > 0;
   } catch {
     return false;
   }
@@ -49,7 +49,7 @@ export function buildPlainText(dto: EmailTemplateDto): string {
     return dto.noHtmlMessage;
   }
 
-  const divider = '──────────────────────────────';
+  const divider = "──────────────────────────────";
   const parts: string[] = [];
 
   if (dto.header) {
@@ -76,18 +76,18 @@ export function buildPlainText(dto: EmailTemplateDto): string {
     parts.push(`${divider}\n${htmlToPlainText(dto.footer)}`);
   }
 
-  return parts.join('\n\n');
+  return parts.join("\n\n");
 }
 
 /**
  * Builds a responsive, styled HTML email document from an email DTO.
  */
 export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions = {}): string {
-  const primaryColor = options.primaryColor || '#4f46e5';
+  const primaryColor = options.primaryColor || "#4f46e5";
   const fontFamily =
     options.fontFamily ||
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
-  const maxWidth = options.maxWidth || '600px';
+  const maxWidth = options.maxWidth || "600px";
 
   const parts: string[] = [
     `<!DOCTYPE html>`,
@@ -106,8 +106,8 @@ export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions
     const validLogo = logoCandidate.trim();
     parts.push(
       `<div style="margin-bottom:24px;text-align:center;">`,
-      `  <img src="${validLogo}" alt="${dto.fromName || 'Logo'}" style="max-height:48px;max-width:200px;height:auto;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;" />`,
-      `</div>`
+      `  <img src="${validLogo}" alt="${dto.fromName || "Logo"}" style="max-height:48px;max-width:200px;height:auto;width:auto;display:inline-block;border:0;outline:none;text-decoration:none;" />`,
+      `</div>`,
     );
   }
 
@@ -115,13 +115,13 @@ export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions
     parts.push(
       `<div style="margin-bottom:24px;text-align:center;">`,
       `  <img src="${dto.imageUrl}" alt="Header" style="max-width:100%;height:auto;border-radius:6px;" />`,
-      `</div>`
+      `</div>`,
     );
   }
 
   if (dto.header) {
     parts.push(
-      `<h2 style="margin:0 0 16px;font-size:1.5rem;font-weight:700;color:#111827;letter-spacing:-0.025em;">${dto.header}</h2>`
+      `<h2 style="margin:0 0 16px;font-size:1.5rem;font-weight:700;color:#111827;letter-spacing:-0.025em;">${dto.header}</h2>`,
     );
   }
 
@@ -133,7 +133,7 @@ export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions
     parts.push(
       `<div style="margin:24px 0;padding:20px;background-color:#f3f4f6;border-radius:8px;text-align:center;">`,
       `  <span style="font-size:2rem;letter-spacing:0.5rem;font-weight:700;color:#111827;font-family:monospace;">${dto.otpCode}</span>`,
-      `</div>`
+      `</div>`,
     );
   }
 
@@ -141,24 +141,24 @@ export function buildHtml(dto: EmailTemplateDto, options: DefaultRendererOptions
     parts.push(
       `<div style="margin:24px 0;text-align:center;">`,
       `  <a href="${dto.actionUrl}" style="display:inline-block;padding:12px 28px;background-color:${primaryColor};color:#ffffff;border-radius:6px;text-decoration:none;font-weight:600;font-size:1rem;text-align:center;box-sizing:border-box;">${dto.actionText}</a>`,
-      `</div>`
+      `</div>`,
     );
   }
 
   if (dto.extraMessage) {
     parts.push(
-      `<div style="margin:20px 0 0;font-size:0.875rem;color:#6b7280;line-height:1.5;">${dto.extraMessage}</div>`
+      `<div style="margin:20px 0 0;font-size:0.875rem;color:#6b7280;line-height:1.5;">${dto.extraMessage}</div>`,
     );
   }
 
   if (dto.footer) {
     parts.push(
-      `<div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:0.75rem;color:#9ca3af;text-align:center;">${dto.footer}</div>`
+      `<div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;font-size:0.75rem;color:#9ca3af;text-align:center;">${dto.footer}</div>`,
     );
   }
 
   parts.push(`</div>`, `</body>`, `</html>`);
-  return parts.join('\n');
+  return parts.join("\n");
 }
 
 /**

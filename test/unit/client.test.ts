@@ -23,7 +23,7 @@ describe("MailKit Client", () => {
       brandName: "My App",
     });
 
-    const result = await mailer.send({
+    const result = await mailer.sendMail({
       to: "jordan@example.com",
       template: dto,
     });
@@ -56,7 +56,7 @@ describe("MailKit Client", () => {
       body: "Hello",
     };
 
-    await mailer.send({
+    await mailer.sendMail({
       to: "student@example.com",
       template: dto,
     });
@@ -115,7 +115,7 @@ describe("MailKit Client", () => {
     expect(memoryTransport.count()).toBe(0);
   });
 
-  it("sendMail sends and send is a deprecated alias", async () => {
+  it("sendMail sends an email", async () => {
     const memoryTransport = new MemoryEmailSender();
     const mailer = createMailKit({
       transport: memoryTransport,
@@ -129,9 +129,6 @@ describe("MailKit Client", () => {
 
     await mailer.sendMail({ to: "a@example.com", template: dto });
     expect(memoryTransport.count()).toBe(1);
-
-    await mailer.send({ to: "b@example.com", template: dto });
-    expect(memoryTransport.count()).toBe(2);
   });
 
   it("sendBulkMail delegates to transport.sendBulk", async () => {

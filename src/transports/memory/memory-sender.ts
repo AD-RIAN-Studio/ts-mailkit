@@ -3,7 +3,7 @@ import type {
   BulkKnownTemplateSendOptions,
   BulkSendOptions,
   KnownTemplateSendOptions,
-} from "../../core/bulk-types.js";
+} from "../../core/types.js";
 import type { IEmailSender } from "../sender.interface.js";
 
 /**
@@ -27,7 +27,6 @@ export class MemoryEmailSender implements IEmailSender {
       success: true,
       messageId,
       rawResponse,
-      response: rawResponse,
     };
   }
 

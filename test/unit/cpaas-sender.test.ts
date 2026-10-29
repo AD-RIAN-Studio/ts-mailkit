@@ -57,7 +57,6 @@ describe("CpaasHttpSender", () => {
     expect(res.success).toBe(true);
     expect(res.messageId).toBe("msg-123");
     expect(res.rawResponse).toEqual({ data: [{ message_id: "msg-123" }] });
-    expect(res.response).toEqual(res.rawResponse);
     expect(capturedUrl).toBe("https://cpaas.zoho.com/v1.1/email");
     expect(capturedHeaders["Authorization"]).toBe("Zoho-enczapikey test_token");
     expect(capturedHeaders["Content-Type"]).toBe("application/json");

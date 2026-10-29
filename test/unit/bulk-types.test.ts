@@ -5,7 +5,7 @@ import type {
   KnownTemplateSendOptions,
   BulkKnownTemplateSendOptions,
   SendBulkMailOptions,
-} from "../../src/core/bulk-types.js";
+} from "../../src/core/types.js";
 
 describe("bulk types", () => {
   it("accepts a bulk recipient with merge info", () => {

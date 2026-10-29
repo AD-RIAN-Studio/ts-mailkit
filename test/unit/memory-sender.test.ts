@@ -64,7 +64,6 @@ describe("MemoryEmailSender", () => {
       html: "<p>S</p>",
     });
     expect(res.rawResponse).toEqual({ id: res.messageId });
-    expect(res.response).toEqual(res.rawResponse);
   });
 
   it("records bulk and template sends", async () => {

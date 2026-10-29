@@ -8,7 +8,7 @@ import type {
   BulkKnownTemplateSendOptions,
   BulkSendOptions,
   KnownTemplateSendOptions,
-} from "../../core/bulk-types.js";
+} from "../../core/types.js";
 import type { IEmailSender } from "../sender.interface.js";
 
 export interface ConsoleEmailSenderOptions {
@@ -136,7 +136,6 @@ export class ConsoleEmailSender implements IEmailSender {
       success: true,
       messageId,
       rawResponse,
-      response: rawResponse,
     };
   }
 }

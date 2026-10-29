@@ -1,8 +1,9 @@
 {
   "name": "ts-mailkit",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Strictly typed, modular, and composable email composition and dispatch library for TypeScript and modern edge runtimes.",
   "keywords": [
+    "cpaas",
     "dto",
     "edge",
     "email",
@@ -10,7 +11,6 @@
     "transactional-email",
     "typescript",
     "workerd",
-    "zeptomail",
     "zoho-mail"
   ],
   "homepage": "https://github.com/AD-RIAN-Studio/ts-mailkit#readme",

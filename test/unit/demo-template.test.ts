@@ -24,7 +24,7 @@ describe("Demo Newsletter HTML Output", () => {
       '<ul style="padding-left:20px;margin:0 0 20px;">',
       "  <li><strong>Top-Center Brand Logo:</strong> First-class support for verified HTTP(S) brand logos positioned at the top-center of your email.</li>",
       "  <li><strong>Zero Runtime Dependencies:</strong> Core transports run on the standard Fetch API across Node.js, Cloudflare Workers, Bun, and Deno.</li>",
-      "  <li><strong>Pluggable Transports:</strong> Drop-in adapters for Zoho ZeptoMail, In-Memory testing, and Dev Console logging.</li>",
+      "  <li><strong>Pluggable Transports:</strong> Drop-in adapters for Zoho CPaaS, In-Memory testing, and Dev Console logging.</li>",
       "  <li><strong>Strictly Typed DTOs:</strong> End-to-end type safety for transactional and marketing emails.</li>",
       "</ul>",
       "<p>Explore the repository, test the components, and build beautiful transactional emails effortlessly.</p>",

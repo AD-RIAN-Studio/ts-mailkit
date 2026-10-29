@@ -11,7 +11,7 @@ import type {
   BulkKnownTemplateSendOptions,
   BulkSendOptions,
   KnownTemplateSendOptions,
-} from "../../core/bulk-types.js";
+} from "../../core/types.js";
 import type { IEmailSender } from "../sender.interface.js";
 import type {
   CpaasAddressObject,
@@ -49,7 +49,7 @@ interface CommonOptions {
 }
 
 /**
- * Zoho CPaaS (formerly ZeptoMail) transactional email HTTP transport adapter.
+ * Zoho CPaaS transactional email HTTP transport adapter.
  *
  * Uses the standard global `fetch` API for zero-dependency, universal edge
  * compatibility (Node.js, Bun, Deno, Cloudflare Workers).
@@ -344,7 +344,6 @@ export class CpaasHttpSender implements IEmailSender {
       success: true,
       messageId,
       rawResponse: responseData,
-      response: responseData,
     };
   }
 }

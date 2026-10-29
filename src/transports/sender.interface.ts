@@ -3,7 +3,7 @@ import type {
   BulkKnownTemplateSendOptions,
   BulkSendOptions,
   KnownTemplateSendOptions,
-} from "../core/bulk-types.js";
+} from "../core/types.js";
 
 /**
  * Contract that every concrete email sender/transport must satisfy.

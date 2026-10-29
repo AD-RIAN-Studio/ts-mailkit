@@ -10,7 +10,7 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
 
 - **Type-Safe DTOs**: Strongly-typed Data Transfer Objects for transactional emails (verification, password reset, 2FA, magic links, newsletters).
 - **Pluggable Transports (`IEmailSender`)**: Decoupled transport adapter interface with built-in senders:
-  - `CpaasHttpSender` (Zoho CPaaS transactional API via native `fetch`; `ZeptoMailHttpSender` is a deprecated alias).
+  - `CpaasHttpSender` (Zoho CPaaS transactional API via native `fetch`).
   - `MemoryEmailSender` (In-memory mock transport for unit and integration testing).
   - `ConsoleEmailSender` (Formatted terminal logger for local development).
 - **Zero Runtime Dependencies**: Core uses standard web APIs (global `fetch`), ensuring zero heavy dependencies and complete edge compatibility.

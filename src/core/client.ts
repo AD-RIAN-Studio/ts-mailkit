@@ -5,18 +5,18 @@ import { htmlToPlainText } from "../renderers/utils/html-to-plaintext.js";
 import type { EmailTemplateDto } from "../templates/dto/index.js";
 import {
   normalizeRecipient,
+  type BulkKnownTemplateSendOptions,
+  type KnownTemplateSendOptions,
+  type MailAddressOptions,
+  type MailMetadataOptions,
   type Recipient,
+  type SendBulkMailOptions,
   type SendMailOptions,
   type SendResult,
 } from "./types.js";
-import type {
-  BulkKnownTemplateSendOptions,
-  KnownTemplateSendOptions,
-  SendBulkMailOptions,
-} from "./bulk-types.js";
 import { ConfigurationError } from "./errors.js";
 
-export interface SendTemplateOptions {
+export interface SendTemplateOptions extends MailAddressOptions, MailMetadataOptions {
   /**
    * One or more recipient email addresses.
    */
@@ -33,43 +33,11 @@ export interface SendTemplateOptions {
    * Optional sender display name override for this specific email.
    */
   fromName?: string;
-  /**
-   * Optional sender email address override.
-   */
-  from?: Recipient;
-  /**
-   * Optional CC recipients.
-   */
-  cc?: Recipient | Recipient[];
-  /**
-   * Optional BCC recipients.
-   */
-  bcc?: Recipient | Recipient[];
-  /**
-   * Optional Reply-To recipients.
-   */
-  replyTo?: Recipient | Recipient[];
-  /**
-   * Optional file attachments.
-   */
-  attachments?: SendMailOptions["attachments"];
-  /**
-   * Optional custom headers.
-   */
-  headers?: Record<string, string>;
-  /**
-   * Optional tags for tracking.
-   */
-  tags?: string[];
-  /**
-   * Optional metadata.
-   */
-  metadata?: Record<string, string>;
 }
 
 export interface MailKitOptions {
   /**
-   * The transport adapter used to dispatch emails (e.g. ZeptoMailHttpSender, MemoryEmailSender).
+   * The transport adapter used to dispatch emails (e.g. CpaasHttpSender, MemoryEmailSender).
    */
   transport: IEmailSender;
   /**
@@ -174,13 +142,6 @@ export class MailKit {
   }
 
   /**
-   * @deprecated Use {@link sendMail} instead.
-   */
-  async send(options: SendTemplateOptions): Promise<SendResult> {
-    return await this.sendMail(options);
-  }
-
-  /**
    * Sends a bulk email using a strongly-typed template DTO.
    *
    * The transport delivers an individual copy to each recipient, so
@@ -225,6 +186,8 @@ export class MailKit {
       metadata: options.metadata,
       trackClicks: options.trackClicks,
       trackOpens: options.trackOpens,
+      bounceAddress: options.bounceAddress,
+      clientReference: options.clientReference,
     });
   }
 

@@ -56,4 +56,32 @@ describe("MemoryEmailSender", () => {
     expect(sender.getSentMails()).toEqual([]);
     expect(sender.getLastMail()).toBeUndefined();
   });
+
+  it("returns rawResponse on send", async () => {
+    const res = await sender.send({
+      to: "a@example.com",
+      subject: "S",
+      html: "<p>S</p>",
+    });
+    expect(res.rawResponse).toEqual({ id: res.messageId });
+    expect(res.response).toEqual(res.rawResponse);
+  });
+
+  it("records bulk and template sends", async () => {
+    await sender.sendBulk({ to: ["a@example.com"], subject: "S", html: "<p>S</p>" });
+    await sender.sendKnownTemplate({ templateId: "t", to: "a@example.com" });
+    await sender.sendBulkKnownTemplate({
+      templateId: "t",
+      to: [{ address: "a@example.com" }],
+    });
+
+    expect(sender.getSentBulkMails()).toHaveLength(1);
+    expect(sender.getSentTemplateMails()).toHaveLength(1);
+    expect(sender.getSentBulkTemplateMails()).toHaveLength(1);
+
+    sender.clear();
+    expect(sender.getSentBulkMails()).toHaveLength(0);
+    expect(sender.getSentTemplateMails()).toHaveLength(0);
+    expect(sender.getSentBulkTemplateMails()).toHaveLength(0);
+  });
 });

@@ -1,4 +1,9 @@
 import type { SendMailOptions, SendResult } from "../../core/types.js";
+import type {
+  BulkKnownTemplateSendOptions,
+  BulkSendOptions,
+  KnownTemplateSendOptions,
+} from "../../core/bulk-types.js";
 import type { IEmailSender } from "../sender.interface.js";
 
 /**
@@ -9,41 +14,90 @@ export class MemoryEmailSender implements IEmailSender {
   readonly name = "memory";
 
   private sentMails: SendMailOptions[] = [];
+  private sentBulkMails: BulkSendOptions[] = [];
+  private sentTemplateMails: KnownTemplateSendOptions[] = [];
+  private sentBulkTemplateMails: BulkKnownTemplateSendOptions[] = [];
   private nextId = 1;
 
-  async send(options: SendMailOptions): Promise<SendResult> {
-    this.sentMails.push({ ...options });
-    const messageId = `mem-${this.nextId++}-${Date.now()}`;
+  private result(prefix?: string): SendResult {
+    const id = this.nextId++;
+    const messageId = prefix ? `mem-${prefix}-${id}-${Date.now()}` : `mem-${id}-${Date.now()}`;
+    const rawResponse = { id: messageId };
     return {
       success: true,
       messageId,
-      response: { id: messageId },
+      rawResponse,
+      response: rawResponse,
     };
   }
 
+  async send(options: SendMailOptions): Promise<SendResult> {
+    this.sentMails.push({ ...options });
+    return this.result();
+  }
+
+  async sendBulk(options: BulkSendOptions): Promise<SendResult> {
+    this.sentBulkMails.push({ ...options });
+    return this.result("bulk");
+  }
+
+  async sendKnownTemplate(options: KnownTemplateSendOptions): Promise<SendResult> {
+    this.sentTemplateMails.push({ ...options });
+    return this.result("tpl");
+  }
+
+  async sendBulkKnownTemplate(options: BulkKnownTemplateSendOptions): Promise<SendResult> {
+    this.sentBulkTemplateMails.push({ ...options });
+    return this.result("bulk-tpl");
+  }
+
   /**
-   * Returns a copy of all emails sent through this transport instance.
+   * Returns a copy of all single emails sent through this transport instance.
    */
   getSentMails(): SendMailOptions[] {
     return [...this.sentMails];
   }
 
   /**
-   * Returns the most recent email sent, or undefined if no emails have been sent.
+   * Returns the most recent single email sent, or undefined if none have been sent.
    */
   getLastMail(): SendMailOptions | undefined {
     return this.sentMails.length > 0 ? { ...this.sentMails[this.sentMails.length - 1] } : undefined;
   }
 
   /**
-   * Clears all recorded sent emails.
+   * Returns a copy of all bulk emails sent through this transport instance.
    */
-  clear(): void {
-    this.sentMails = [];
+  getSentBulkMails(): BulkSendOptions[] {
+    return [...this.sentBulkMails];
   }
 
   /**
-   * Returns the total count of sent emails.
+   * Returns a copy of all single template emails sent through this transport instance.
+   */
+  getSentTemplateMails(): KnownTemplateSendOptions[] {
+    return [...this.sentTemplateMails];
+  }
+
+  /**
+   * Returns a copy of all bulk template emails sent through this transport instance.
+   */
+  getSentBulkTemplateMails(): BulkKnownTemplateSendOptions[] {
+    return [...this.sentBulkTemplateMails];
+  }
+
+  /**
+   * Clears all recorded emails.
+   */
+  clear(): void {
+    this.sentMails = [];
+    this.sentBulkMails = [];
+    this.sentTemplateMails = [];
+    this.sentBulkTemplateMails = [];
+  }
+
+  /**
+   * Returns the total count of single emails sent.
    */
   count(): number {
     return this.sentMails.length;

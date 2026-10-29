@@ -40,7 +40,8 @@ pnpm run check && pnpm run typecheck && pnpm test:unit && pnpm run build
 
 - `src/core/`: Domain models (`types.ts`), error hierarchy (`errors.ts`), and client facade (`client.ts`).
 - `src/transports/`: Pluggable senders implementing `IEmailSender`.
-  - `src/transports/zeptomail/`: Zoho ZeptoMail HTTP adapter (`ZeptoMailHttpSender`, uses global `fetch`).
+  - `src/transports/cpaas/`: Zoho CPaaS (formerly ZeptoMail) HTTP adapter (`CpaasHttpSender`, uses global `fetch`).
+  - `src/transports/zeptomail/`: Deprecated re-export shim for the former `ZeptoMailHttpSender` names.
   - `src/transports/memory/`: In-memory transport for unit/integration tests.
   - `src/transports/console/`: Terminal logger transport for dev mode.
 - `src/templates/`: Strongly typed email DTO schemas (`dto/`) and `EmailTemplateFactory` (`factory.ts`).
@@ -60,12 +61,17 @@ pnpm run check && pnpm run typecheck && pnpm test:unit && pnpm run build
 ## Code Conventions
 
 - **API Structure**:
-  - `mailer.send({ to, template, ... })` is the single canonical template dispatch method.
+  - `mailer.sendMail({ to, template, ... })` is the canonical single-email template dispatch method (`send` is a deprecated alias).
+  - `mailer.sendBulkMail({ to, template, ... })` dispatches one rendered DTO to many recipients via the provider's batch endpoint.
+  - `mailer.sendKnownTemplate({ templateId, to, ... })` dispatches a single provider-side template.
+  - `mailer.sendBulkKnownTemplate({ templateId, to, ... })` dispatches a provider-side template batch with per-recipient `mergeInfo`.
   - `mailer.sendRaw({ to, subject, html, text? })` auto-derives plain-text via `htmlToPlainText` if `text` is omitted.
   - `MailKit` is the canonical client class (created via `createMailKit(...)`).
   - `EmailTemplateDto` is the canonical DTO base interface.
-  - `ZeptoMailHttpSender` is the canonical Zoho ZeptoMail HTTP adapter (takes `ZeptoMailHttpConfig`).
-  - Transports strictly implement `IEmailSender.send(options: SendMailOptions)`.
+  - `CpaasHttpSender` is the canonical Zoho CPaaS HTTP adapter (takes `CpaasHttpConfig`; `ZeptoMailHttpSender` is a deprecated alias).
+  - Transports implement `IEmailSender.send(options: SendMailOptions)`; bulk/template capabilities are optional (`sendBulk`, `sendKnownTemplate`, `sendBulkKnownTemplate`).
+  - `SendResult.rawResponse` carries the raw provider response (`response` is a deprecated alias).
+  - `buildHTMLTemplate(dto, options?)` and `buildPlainTextTemplate(dto)` produce upload-ready provider templates.
   - `parseEmailAddress(input: string): EmailAddress` is a tree-shakeable opt-in helper for RFC 5322 parsing.
 - **Reference Data**: `source-data/` is gitignored historical reference data; never import from or write to `source-data/`.
 - **Commits**: Follow Conventional Commits (`feat: ...`, `fix: ...`, `chore: ...`, `refactor: ...`, `test: ...`).

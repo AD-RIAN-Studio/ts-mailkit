@@ -10,7 +10,7 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
 
 - **Type-Safe DTOs**: Strongly-typed Data Transfer Objects for transactional emails (verification, password reset, 2FA, magic links, newsletters).
 - **Pluggable Transports (`IEmailSender`)**: Decoupled transport adapter interface with built-in senders:
-  - `ZeptoMailHttpSender` (Zoho Mail transactional API via native `fetch`).
+  - `CpaasHttpSender` (Zoho CPaaS transactional API via native `fetch`; `ZeptoMailHttpSender` is a deprecated alias).
   - `MemoryEmailSender` (In-memory mock transport for unit and integration testing).
   - `ConsoleEmailSender` (Formatted terminal logger for local development).
 - **Zero Runtime Dependencies**: Core uses standard web APIs (global `fetch`), ensuring zero heavy dependencies and complete edge compatibility.
@@ -52,12 +52,12 @@ bun add ts-mailkit
 ### 1. Initialize Transport & Client
 
 ```ts
-import { createMailKit, ZeptoMailHttpSender, EmailTemplateFactory } from "ts-mailkit";
+import { createMailKit, CpaasHttpSender, EmailTemplateFactory } from "ts-mailkit";
 
-// Configure the Zoho ZeptoMail HTTP transport
-const transport = new ZeptoMailHttpSender({
-  apiToken: process.env.ZEPTO_MAIL_TOKEN!,
-  apiHost: "api.zeptomail.com", // or 'api.zeptomail.eu', 'api.zeptomail.in'
+// Configure the Zoho CPaaS HTTP transport
+const transport = new CpaasHttpSender({
+  apiToken: process.env.CPAAS_API_KEY!,
+  apiHost: "cpaas.zoho.com", // or 'cpaas.zoho.eu', 'cpaas.zoho.in'
   from: { address: "noreply@yourdomain.com", name: "Acme App" },
 });
 
@@ -79,7 +79,7 @@ const verificationEmail = EmailTemplateFactory.createEmailVerification({
 });
 
 // 2. Dispatch via MailKit
-await mailer.send({
+await mailer.sendMail({
   to: "alex@example.com",
   template: verificationEmail,
 });
@@ -191,7 +191,7 @@ describe("User Registration Email", () => {
       otp: "889900",
     });
 
-    await mailer.send({ to: "sam@example.com", template: dto });
+    await mailer.sendMail({ to: "sam@example.com", template: dto });
 
     expect(memoryTransport.count()).toBe(1);
     const sent = memoryTransport.getLastMail();
@@ -238,7 +238,7 @@ const simple = parseEmailAddress("jane@example.com");
 
 ### 6. Pluggable Transports (`IEmailSender`)
 
-You can implement custom transports (e.g. SMTP, Resend, SendGrid, Postmark) by satisfying the `IEmailSender` interface:
+You can implement custom transports (e.g. SMTP, Resend, SendGrid, Postmark) by satisfying the `IEmailSender` interface. Bulk and provider-template capabilities are optional: implement `sendBulk`, `sendKnownTemplate`, and/or `sendBulkKnownTemplate` to enable them. `MailKit` throws a `ConfigurationError` if a method is called on a transport that does not implement it.
 
 ```ts
 import type { IEmailSender, SendMailOptions, SendResult } from "ts-mailkit";
@@ -254,6 +254,56 @@ export class CustomSmtpSender implements IEmailSender {
     };
   }
 }
+```
+
+### 7. Bulk Messaging & Provider-Side Templates
+
+`MailKit` exposes four canonical send methods. Bulk methods hit the provider's batch endpoints directly (no client-side loops) and deliver an individual copy to each recipient.
+
+```ts
+// 1. Bulk manual template: one rendered DTO, delivered individually to every recipient.
+await mailer.sendBulkMail({
+  to: ["a@example.com", "b@example.com"],
+  template: newsletterDto,
+  trackClicks: true,
+  trackOpens: true,
+});
+
+// 2. Single provider-side template (uploaded to Zoho CPaaS / SendGrid beforehand).
+await mailer.sendKnownTemplate({
+  templateId: "welcome-email",
+  to: "alex@example.com",
+  mergeInfo: { user_name: "Alex" },
+});
+
+// 3. Bulk provider-side template with per-recipient merge data.
+await mailer.sendBulkKnownTemplate({
+  templateId: "welcome-email",
+  to: [
+    { address: "alex@example.com", name: "Alex", mergeInfo: { user_name: "Alex" } },
+    { address: "sam@example.com", name: "Sam", mergeInfo: { user_name: "Sam" } },
+  ],
+});
+```
+
+Set `CpaasHttpConfig.preferTemplateAlias: true` to send `template_alias` instead of `template_key`. Every transport returns a unified `SendResult` whose `rawResponse` field holds the provider's raw response (typed via the exported `CpaasSuccessResponse` / `CpaasErrorResponse` types).
+
+### 8. Building Upload-Ready Templates
+
+`buildHTMLTemplate` and `buildPlainTextTemplate` turn the canonical `EmailTemplateDto` into content you can upload to a messaging platform:
+
+```ts
+import { buildHTMLTemplate, buildPlainTextTemplate, EmailTemplateFactory } from "ts-mailkit";
+
+const dto = EmailTemplateFactory.createSimpleMessage({
+  subject: "Welcome",
+  header: "Hello",
+  body: "Thanks for joining.",
+});
+
+const html = buildHTMLTemplate(dto, { primaryColor: "#0f766e", maxWidth: "640px" });
+const text = buildPlainTextTemplate(dto);
+// Upload `html` / `text` as a provider-side template, then send with `sendKnownTemplate`.
 ```
 
 ---

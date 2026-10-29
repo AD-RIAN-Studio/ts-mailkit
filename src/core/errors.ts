@@ -27,6 +27,8 @@ export class TransportError extends MailKitError {
   readonly transportName: string;
   readonly statusCode?: number;
   readonly responseBody?: string;
+  /** Parsed raw provider response, when available. */
+  readonly rawResponse?: unknown;
   readonly cause?: unknown;
 
   constructor(
@@ -35,6 +37,7 @@ export class TransportError extends MailKitError {
       transportName: string;
       statusCode?: number;
       responseBody?: string;
+      rawResponse?: unknown;
       cause?: unknown;
     },
   ) {
@@ -43,6 +46,7 @@ export class TransportError extends MailKitError {
     this.transportName = options.transportName;
     this.statusCode = options.statusCode;
     this.responseBody = options.responseBody;
+    this.rawResponse = options.rawResponse;
     this.cause = options.cause;
     Object.setPrototypeOf(this, new.target.prototype);
   }

@@ -1,54 +1,11 @@
-import type { Recipient } from "../../core/types.js";
-
-export interface ZeptoMailHttpConfig {
-  /**
-   * Zoho ZeptoMail API host domain.
-   * Examples: 'api.zeptomail.com', 'api.zeptomail.eu', 'api.zeptomail.in'
-   * @default 'api.zeptomail.com'
-   */
-  apiHost?: string;
-
-  /**
-   * ZeptoMail Send Mail API Token.
-   */
-  apiToken: string;
-
-  /**
-   * Default verified sender email address or Recipient object.
-   */
-  from: Recipient;
-
-  /**
-   * Optional custom fetch implementation (useful for mocking, testing, or proxies).
-   * Defaults to global `fetch`.
-   */
-  fetch?: typeof fetch;
-}
-
-export interface ZeptoMailAddressObject {
-  address: string;
-  name?: string;
-}
-
-export interface ZeptoMailRecipientWrapper {
-  email_address: ZeptoMailAddressObject;
-}
-
-export interface ZeptoMailAttachmentPayload {
-  name: string;
-  content: string; // base64 encoded
-  mime_type?: string;
-  cid?: string;
-}
-
-export interface ZeptoMailSendPayload {
-  from: ZeptoMailAddressObject;
-  to: ZeptoMailRecipientWrapper[];
-  subject: string;
-  htmlbody: string;
-  textbody?: string;
-  cc?: ZeptoMailRecipientWrapper[];
-  bcc?: ZeptoMailRecipientWrapper[];
-  reply_to?: ZeptoMailAddressObject[];
-  attachments?: ZeptoMailAttachmentPayload[];
-}
+/**
+ * @deprecated ZeptoMail has been renamed to Zoho CPaaS.
+ * Import from `../cpaas/types.js` or the package root instead.
+ */
+export type {
+  CpaasHttpConfig as ZeptoMailHttpConfig,
+  CpaasAddressObject as ZeptoMailAddressObject,
+  CpaasRecipientWrapper as ZeptoMailRecipientWrapper,
+  CpaasAttachmentPayload as ZeptoMailAttachmentPayload,
+  CpaasSendPayload as ZeptoMailSendPayload,
+} from "../cpaas/types.js";

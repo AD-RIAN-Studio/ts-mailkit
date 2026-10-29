@@ -101,5 +101,10 @@ export interface SendMailOptions {
 export interface SendResult {
   success: boolean;
   messageId?: string;
+  /** Raw provider response (e.g. Zoho CPaaS JSON body). */
+  rawResponse?: unknown;
+  /**
+   * @deprecated Use `rawResponse` instead.
+   */
   response?: unknown;
 }

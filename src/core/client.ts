@@ -9,6 +9,11 @@ import {
   type SendMailOptions,
   type SendResult,
 } from "./types.js";
+import type {
+  BulkKnownTemplateSendOptions,
+  KnownTemplateSendOptions,
+  SendBulkMailOptions,
+} from "./bulk-types.js";
 import { ConfigurationError } from "./errors.js";
 
 export interface SendTemplateOptions {
@@ -126,24 +131,16 @@ export class MailKit {
    *
    * Example:
    * ```ts
-   * await mailer.send({
+   * await mailer.sendMail({
    *   to: 'user@example.com',
    *   template: myDto,
    * });
    * ```
    */
-  async send(options: SendTemplateOptions): Promise<SendResult> {
+  async sendMail(options: SendTemplateOptions): Promise<SendResult> {
     const template = options.template;
     const recipientName = options.toName ?? template.userName;
-
-    // Resolve fromName: explicit option > template.fromName > brand resolver > defaultBrandName
-    let resolvedFromName = options.fromName ?? template.fromName;
-    if (!resolvedFromName && this.brandNameResolver) {
-      resolvedFromName = await this.brandNameResolver();
-    }
-    if (!resolvedFromName) {
-      resolvedFromName = this.defaultBrandName;
-    }
+    const resolvedFromName = await this.resolveFromName(template, options.fromName);
 
     // Render template DTO
     const rendered = await this.renderer.render(template);
@@ -158,11 +155,7 @@ export class MailKit {
     }
 
     // Resolve From address
-    let from = options.from ?? this.defaultFrom;
-    if (resolvedFromName && from) {
-      const normalizedFrom = normalizeRecipient(from);
-      from = { address: normalizedFrom.address, name: resolvedFromName };
-    }
+    const from = this.applyFromName(options.from ?? this.defaultFrom, resolvedFromName);
 
     return await this.sendRaw({
       to: toRecipients,
@@ -178,6 +171,121 @@ export class MailKit {
       tags: options.tags,
       metadata: options.metadata,
     });
+  }
+
+  /**
+   * @deprecated Use {@link sendMail} instead.
+   */
+  async send(options: SendTemplateOptions): Promise<SendResult> {
+    return await this.sendMail(options);
+  }
+
+  /**
+   * Sends a bulk email using a strongly-typed template DTO.
+   *
+   * The transport delivers an individual copy to each recipient, so
+   * recipients are not exposed to one another. Per-recipient personalization
+   * is available via {@link sendBulkKnownTemplate}.
+   *
+   * Example:
+   * ```ts
+   * await mailer.sendBulkMail({
+   *   to: ['a@example.com', 'b@example.com'],
+   *   template: myDto,
+   * });
+   * ```
+   */
+  async sendBulkMail(options: SendBulkMailOptions): Promise<SendResult> {
+    const transport = this.transport;
+    if (typeof transport.sendBulk !== "function") {
+      throw new ConfigurationError(
+        "MailKit: The configured transport does not support bulk sending (sendBulk).",
+      );
+    }
+
+    const template = options.template;
+    const resolvedFromName = await this.resolveFromName(template);
+
+    const rendered = await this.renderer.render(template);
+    const plaintextBody = template.noHtmlMessage ?? rendered.text;
+    const from = this.applyFromName(options.from ?? this.defaultFrom, resolvedFromName);
+
+    return await transport.sendBulk({
+      to: options.to,
+      from,
+      subject: template.subject,
+      html: rendered.html,
+      text: plaintextBody,
+      cc: options.cc,
+      bcc: options.bcc,
+      replyTo: options.replyTo,
+      attachments: options.attachments,
+      headers: options.headers,
+      tags: options.tags,
+      metadata: options.metadata,
+      trackClicks: options.trackClicks,
+      trackOpens: options.trackOpens,
+    });
+  }
+
+  /**
+   * Sends a single email using a provider-side template.
+   */
+  async sendKnownTemplate(options: KnownTemplateSendOptions): Promise<SendResult> {
+    const transport = this.transport;
+    if (typeof transport.sendKnownTemplate !== "function") {
+      throw new ConfigurationError(
+        "MailKit: The configured transport does not support template sending (sendKnownTemplate).",
+      );
+    }
+
+    return await transport.sendKnownTemplate({
+      ...options,
+      from: options.from ?? this.defaultFrom,
+    });
+  }
+
+  /**
+   * Sends a bulk email using a provider-side template with optional
+   * per-recipient merge data.
+   */
+  async sendBulkKnownTemplate(options: BulkKnownTemplateSendOptions): Promise<SendResult> {
+    const transport = this.transport;
+    if (typeof transport.sendBulkKnownTemplate !== "function") {
+      throw new ConfigurationError(
+        "MailKit: The configured transport does not support bulk template sending (sendBulkKnownTemplate).",
+      );
+    }
+
+    return await transport.sendBulkKnownTemplate({
+      ...options,
+      from: options.from ?? this.defaultFrom,
+    });
+  }
+
+  private async resolveFromName(
+    template: EmailTemplateDto,
+    explicitFromName?: string,
+  ): Promise<string | undefined> {
+    let resolved = explicitFromName ?? template.fromName;
+    if (!resolved && this.brandNameResolver) {
+      resolved = await this.brandNameResolver();
+    }
+    if (!resolved) {
+      resolved = this.defaultBrandName;
+    }
+    return resolved;
+  }
+
+  private applyFromName(
+    from: Recipient | undefined,
+    fromName: string | undefined,
+  ): Recipient | undefined {
+    if (fromName && from) {
+      const normalizedFrom = normalizeRecipient(from);
+      return { address: normalizedFrom.address, name: fromName };
+    }
+    return from;
   }
 
   /**

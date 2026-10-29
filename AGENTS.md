@@ -61,7 +61,7 @@ pnpm run check && pnpm run typecheck && pnpm test:unit && pnpm run build
 
 - **API Structure**:
   - `mailer.sendMail({ to, template, ... })` is the canonical single-email template dispatch method.
-  - `mailer.sendBulkMail({ to, template, ... })` dispatches one rendered DTO to many recipients via the provider's batch endpoint.
+  - `mailer.sendBulkMail({ to, template, ... })` dispatches the same rendered DTO to many recipients via the provider's batch endpoint (per-recipient content: use `sendBulkKnownTemplate`).
   - `mailer.sendKnownTemplate({ templateId, to, ... })` dispatches a single provider-side template.
   - `mailer.sendBulkKnownTemplate({ templateId, to, ... })` dispatches a provider-side template batch with per-recipient `mergeInfo`.
   - `mailer.sendRaw({ to, subject, html, text? })` auto-derives plain-text via `htmlToPlainText` if `text` is omitted.

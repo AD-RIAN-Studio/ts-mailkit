@@ -209,12 +209,14 @@ export interface BulkKnownTemplateSendOptions extends MailAddressOptions, Tracki
 }
 
 /**
- * Client-level options for sending a bulk email using the in-built template DTO.
+ * Client-level options for sending the same in-built template DTO to many
+ * recipients. For per-recipient content, use `sendBulkKnownTemplate` with a
+ * provider-side template and `mergeInfo`.
  */
 export interface SendBulkMailOptions
   extends MailAddressOptions, MailMetadataOptions, TrackingOptions {
   /**
-   * Templated email DTO to render and send to every recipient.
+   * Templated email DTO rendered once and sent to every recipient.
    */
   template: EmailTemplateDto;
   /**

@@ -142,11 +142,12 @@ export class MailKit {
   }
 
   /**
-   * Sends a bulk email using a strongly-typed template DTO.
+   * Sends the same rendered template DTO to every recipient in a single batch.
    *
    * The transport delivers an individual copy to each recipient, so
-   * recipients are not exposed to one another. Per-recipient personalization
-   * is available via {@link sendBulkKnownTemplate}.
+   * recipients are not exposed to one another. The content is identical for
+   * everyone; for per-recipient content, use {@link sendBulkKnownTemplate}
+   * with a provider-side template and `mergeInfo`.
    *
    * Example:
    * ```ts

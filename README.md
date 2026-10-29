@@ -261,7 +261,9 @@ export class CustomSmtpSender implements IEmailSender {
 `MailKit` exposes four canonical send methods. Bulk methods hit the provider's batch endpoints directly (no client-side loops) and deliver an individual copy to each recipient.
 
 ```ts
-// 1. Bulk manual template: one rendered DTO, delivered individually to every recipient.
+// 1. Bulk manual template: the SAME rendered DTO is delivered individually
+//    to every recipient (one batch call). For per-recipient content, use
+//    sendBulkKnownTemplate below.
 await mailer.sendBulkMail({
   to: ["a@example.com", "b@example.com"],
   template: newsletterDto,

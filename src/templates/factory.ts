@@ -70,28 +70,46 @@ export class EmailTemplateFactory {
     return this.footerResolver(brandName);
   }
 
+  private arrangePlainTextWithExtras(base: string, extraMessage?: string, footer?: string): string {
+    const parts = [base];
+    if (extraMessage) {
+      parts.push(htmlToPlainText(extraMessage));
+    }
+    if (footer) {
+      parts.push(htmlToPlainText(footer));
+    }
+    return parts.join("\n\n");
+  }
+
   /**
    * Welcome / email-verification email sent after registration.
    */
   createEmailVerification(params: EmailVerificationParams): EmailTemplateDto {
-    const { username, verificationUrl, otp, brandName } = params;
+    const { username, verificationUrl, otp, brandName, logoUrl, extraMessage, footer } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Thank you for signing up. Use the code below or click the button to verify your email address.`;
+    const resolvedExtraMessage = extraMessage ?? this.defaultSecurityMessage;
+    const resolvedFooter = footer ?? this.buildFooter(brand);
+    const plainTextBody =
+      htmlToPlainText(body) +
+      `\n\nYour verification code is: ${otp}\n\nAlternatively, verify here:\n${verificationUrl}`;
     return {
       subject: "Verify Your Email Address",
       header: `Welcome to ${brand}!`,
       body,
-      logoUrl: this.defaultLogoUrl,
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: verificationUrl,
       actionText: "Verify Email",
-      extraMessage: this.defaultSecurityMessage,
-      footer: this.buildFooter(brand),
+      extraMessage: resolvedExtraMessage,
+      footer: resolvedFooter,
       userName: username,
       fromName: brand,
-      noHtmlMessage:
-        htmlToPlainText(body) +
-        `\n\nYour verification code is: ${otp}\n\nAlternatively, verify here:\n${verificationUrl}`,
+      noHtmlMessage: this.arrangePlainTextWithExtras(
+        plainTextBody,
+        resolvedExtraMessage,
+        resolvedFooter,
+      ),
     };
   }
 
@@ -99,26 +117,33 @@ export class EmailTemplateFactory {
    * Password-reset email with an optional OTP code and action link.
    */
   createPasswordReset(params: PasswordResetParams): EmailTemplateDto {
-    const { username, resetUrl, otp = "", brandName } = params;
+    const { username, resetUrl, otp = "", brandName, logoUrl, extraMessage, footer } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>We received a request to reset your password. Use the OTP code below or click the button to proceed.`;
     const plainTextOtp = otp ? `\n\nYour OTP code is: ${otp}` : "";
+    const resolvedExtraMessage = extraMessage ?? this.defaultSecurityMessage;
+    const resolvedFooter = footer ?? this.buildFooter(brand);
+    const plainTextBody =
+      htmlToPlainText(body) +
+      plainTextOtp +
+      `\n\nAlternatively, you can use the following link to reset your password:\n${resetUrl}`;
     return {
       subject: "Password Reset Request",
       header: "Reset Your Password",
       body,
-      logoUrl: this.defaultLogoUrl,
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
       otpCode: otp || undefined,
       actionUrl: resetUrl,
       actionText: "Reset Password",
-      extraMessage: this.defaultSecurityMessage,
-      footer: this.buildFooter(brand),
+      extraMessage: resolvedExtraMessage,
+      footer: resolvedFooter,
       userName: username,
       fromName: brand,
-      noHtmlMessage:
-        htmlToPlainText(body) +
-        plainTextOtp +
-        `\n\nAlternatively, you can use the following link to reset your password:\n${resetUrl}`,
+      noHtmlMessage: this.arrangePlainTextWithExtras(
+        plainTextBody,
+        resolvedExtraMessage,
+        resolvedFooter,
+      ),
     };
   }
 
@@ -126,16 +151,22 @@ export class EmailTemplateFactory {
    * Generic plain message email (no action button, no OTP).
    */
   createSimpleMessage(params: SimpleMessageParams): EmailTemplateDto {
-    const { subject, header, body, brandName } = params;
+    const { subject, header, body, brandName, logoUrl, extraMessage, footer } = params;
     const brand = this.resolveBrand(brandName);
+    const resolvedFooter = footer ?? this.buildFooter(brand);
     return {
       subject,
       header,
       body,
-      logoUrl: this.defaultLogoUrl,
-      footer: this.buildFooter(brand),
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
+      extraMessage,
+      footer: resolvedFooter,
       fromName: brand,
-      noHtmlMessage: htmlToPlainText(body),
+      noHtmlMessage: this.arrangePlainTextWithExtras(
+        htmlToPlainText(body),
+        extraMessage,
+        resolvedFooter,
+      ),
     };
   }
 
@@ -143,23 +174,36 @@ export class EmailTemplateFactory {
    * Newsletter / announcement email with an optional hero image and CTA button.
    */
   createNewsLetter(params: NewsletterParams): EmailTemplateDto {
-    const { subject, header, body, imageUrl, actionUrl, actionText, brandName, logoUrl } = params;
+    const {
+      subject,
+      header,
+      body,
+      imageUrl,
+      actionUrl,
+      actionText,
+      brandName,
+      logoUrl,
+      extraMessage,
+      footer,
+    } = params;
     const brand = this.resolveBrand(brandName);
-    let noHtmlMessage = htmlToPlainText(body);
+    const resolvedFooter = footer ?? this.buildFooter(brand);
+    let plainTextBody = htmlToPlainText(body);
     if (actionUrl) {
-      noHtmlMessage += `\n\n${actionText || "Learn more"}: ${actionUrl}`;
+      plainTextBody += `\n\n${actionText || "Learn more"}: ${actionUrl}`;
     }
     return {
       subject,
       header,
       body,
-      logoUrl: logoUrl || this.defaultLogoUrl,
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
       imageUrl,
       actionUrl,
       actionText,
-      footer: this.buildFooter(brand),
+      extraMessage,
+      footer: resolvedFooter,
       fromName: brand,
-      noHtmlMessage,
+      noHtmlMessage: this.arrangePlainTextWithExtras(plainTextBody, extraMessage, resolvedFooter),
     };
   }
 
@@ -167,23 +211,31 @@ export class EmailTemplateFactory {
    * Two-factor authentication email with OTP code and optional magic link.
    */
   create2FAEmail(params: TwoFactorParams): EmailTemplateDto {
-    const { username, otp, magicLink = "", brandName } = params;
+    const { username, otp, magicLink = "", brandName, logoUrl, extraMessage, footer } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Use the code below or click the button to complete your login.`;
     const plainLink = magicLink ? `\n\nAlternatively, verify here:\n${magicLink}` : "";
+    const resolvedExtraMessage = extraMessage ?? this.defaultSecurityMessage;
+    const resolvedFooter = footer ?? this.buildFooter(brand);
+    const plainTextBody =
+      htmlToPlainText(body) + `\n\nYour verification code is: ${otp}` + plainLink;
     return {
       subject: "Your Login Verification Code",
       header: "Two-Factor Authentication",
       body,
-      logoUrl: this.defaultLogoUrl,
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
       otpCode: otp,
       actionUrl: magicLink || undefined,
       actionText: magicLink ? "Verify Login" : undefined,
-      extraMessage: this.defaultSecurityMessage,
-      footer: this.buildFooter(brand),
+      extraMessage: resolvedExtraMessage,
+      footer: resolvedFooter,
       userName: username,
       fromName: brand,
-      noHtmlMessage: htmlToPlainText(body) + `\n\nYour verification code is: ${otp}` + plainLink,
+      noHtmlMessage: this.arrangePlainTextWithExtras(
+        plainTextBody,
+        resolvedExtraMessage,
+        resolvedFooter,
+      ),
     };
   }
 
@@ -191,21 +243,28 @@ export class EmailTemplateFactory {
    * Magic link sign-in email (no OTP, button only).
    */
   createMagicLinkEmail(params: MagicLinkParams): EmailTemplateDto {
-    const { username, magicLink, brandName } = params;
+    const { username, magicLink, brandName, logoUrl, extraMessage, footer } = params;
     const brand = this.resolveBrand(brandName);
     const body = `Hi ${username},<br/>Click the button below to sign in. No password needed.`;
+    const resolvedExtraMessage = extraMessage ?? this.defaultSecurityMessage;
+    const resolvedFooter = footer ?? this.buildFooter(brand);
+    const plainTextBody = htmlToPlainText(body) + `\n\nSign in here:\n${magicLink}`;
     return {
       subject: "Your Magic Link",
       header: `Sign In to ${brand}`,
       body,
-      logoUrl: this.defaultLogoUrl,
+      logoUrl: logoUrl ?? this.defaultLogoUrl,
       actionUrl: magicLink,
       actionText: "Sign In",
-      extraMessage: this.defaultSecurityMessage,
-      footer: this.buildFooter(brand),
+      extraMessage: resolvedExtraMessage,
+      footer: resolvedFooter,
       userName: username,
       fromName: brand,
-      noHtmlMessage: htmlToPlainText(body) + `\n\nSign in here:\n${magicLink}`,
+      noHtmlMessage: this.arrangePlainTextWithExtras(
+        plainTextBody,
+        resolvedExtraMessage,
+        resolvedFooter,
+      ),
     };
   }
 

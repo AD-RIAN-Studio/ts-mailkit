@@ -52,7 +52,8 @@ describe("EmailTemplateFactory", () => {
       expect(dto.header).toBe("Maintenance Alert");
       expect(dto.body).toBe("We will be undergoing scheduled maintenance.");
       expect(dto.fromName).toBe("Platform Team");
-      expect(dto.noHtmlMessage).toBe("We will be undergoing scheduled maintenance.");
+      expect(dto.noHtmlMessage).toContain("We will be undergoing scheduled maintenance.");
+      expect(dto.noHtmlMessage).toContain("Platform Team. All rights reserved.");
     });
 
     it("creates newsletter template with optional CTA and image", () => {
@@ -129,6 +130,76 @@ describe("EmailTemplateFactory", () => {
       });
 
       expect(dto.logoUrl).toBe("https://brand.test/custom-newsletter-logo.png");
+    });
+
+    it("honors per-call logoUrl, extraMessage, and footer overrides", () => {
+      const factory = new EmailTemplateFactory({
+        brandName: "Default Brand",
+        logoUrl: "https://brand.test/default.png",
+        securityMessage: "Default security.",
+        footer: "Default footer.",
+      });
+
+      const dto = factory.createEmailVerification({
+        username: "User",
+        verificationUrl: "https://verify.url",
+        otp: "1234",
+        logoUrl: "https://brand.test/custom.png",
+        extraMessage: "Custom security note.",
+        footer: "Custom footer.",
+      });
+
+      expect(dto.logoUrl).toBe("https://brand.test/custom.png");
+      expect(dto.extraMessage).toBe("Custom security note.");
+      expect(dto.footer).toBe("Custom footer.");
+      expect(dto.noHtmlMessage).toContain("Custom security note.");
+      expect(dto.noHtmlMessage).toContain("Custom footer.");
+    });
+
+    it("honors extraMessage and footer on simple and newsletter messages", () => {
+      const factory = new EmailTemplateFactory({ brandName: "Brand" });
+
+      const simple = factory.createSimpleMessage({
+        subject: "S",
+        header: "H",
+        body: "B",
+        extraMessage: "Extra note",
+        footer: "Simple footer",
+      });
+      expect(simple.extraMessage).toBe("Extra note");
+      expect(simple.footer).toBe("Simple footer");
+      expect(simple.noHtmlMessage).toContain("Extra note");
+      expect(simple.noHtmlMessage).toContain("Simple footer");
+
+      const news = factory.createNewsLetter({
+        subject: "S",
+        header: "H",
+        body: "B",
+        extraMessage: "News extra",
+        footer: "News footer",
+      });
+      expect(news.extraMessage).toBe("News extra");
+      expect(news.footer).toBe("News footer");
+      expect(news.noHtmlMessage).toContain("News extra");
+      expect(news.noHtmlMessage).toContain("News footer");
+    });
+
+    it("falls back to branding defaults when per-call overrides are omitted", () => {
+      const factory = new EmailTemplateFactory({
+        brandName: "Brand",
+        logoUrl: "https://brand.test/logo.png",
+        securityMessage: "Default security.",
+        footer: "Default footer.",
+      });
+
+      const dto = factory.createPasswordReset({
+        username: "User",
+        resetUrl: "https://reset.url",
+      });
+
+      expect(dto.logoUrl).toBe("https://brand.test/logo.png");
+      expect(dto.extraMessage).toBe("Default security.");
+      expect(dto.footer).toBe("Default footer.");
     });
   });
 });

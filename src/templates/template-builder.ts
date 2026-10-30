@@ -1,36 +1,11 @@
 import type { EmailTemplateDto } from "./dto/index.js";
-import {
-  buildHtml,
-  buildPlainText,
-  type DefaultRendererOptions,
-} from "../renderers/default/default-renderer.js";
+import { buildHtml, buildPlainText } from "../renderers/default/default-renderer.js";
+import type { RendererOptions } from "../renderers/renderer.interface.js";
 
 /**
  * Styling options for building upload-ready templates.
  */
-export interface TemplateBuildOptions {
-  /**
-   * Primary brand color for buttons and accents.
-   * @default '#4f46e5'
-   */
-  primaryColor?: string;
-
-  /**
-   * Font stack used in the HTML wrapper.
-   */
-  fontFamily?: string;
-
-  /**
-   * Container maximum width.
-   * @default '600px'
-   */
-  maxWidth?: string;
-
-  /**
-   * Default logo URL displayed at the top-center of the template.
-   */
-  logoUrl?: string;
-}
+export interface TemplateBuildOptions extends RendererOptions {}
 
 /**
  * Builds an upload-ready HTML template from the canonical {@link EmailTemplateDto}.
@@ -42,7 +17,7 @@ export function buildHTMLTemplate(
   dto: EmailTemplateDto,
   options: TemplateBuildOptions = {},
 ): string {
-  return buildHtml(dto, options as DefaultRendererOptions);
+  return buildHtml(dto, options);
 }
 
 /**

@@ -1,32 +1,11 @@
 import type { EmailTemplateDto } from "../../templates/dto/index.js";
-import type { IEmailRenderer, RenderedEmail } from "../renderer.interface.js";
+import type { IEmailRenderer, RenderedEmail, RendererOptions } from "../renderer.interface.js";
 import { htmlToPlainText } from "../utils/html-to-plaintext.js";
 
-export interface DefaultRendererOptions {
-  /**
-   * Primary brand color for buttons and accents.
-   * @default '#4f46e5'
-   */
-  primaryColor?: string;
-
-  /**
-   * Font stack used in the HTML wrapper.
-   * @default "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-   */
-  fontFamily?: string;
-
-  /**
-   * Container maximum width.
-   * @default '600px'
-   */
-  maxWidth?: string;
-
-  /**
-   * Default logo URL displayed at the top-center of the email if not provided in the DTO.
-   * Must be a valid http(s) URL.
-   */
-  logoUrl?: string;
-}
+/**
+ * Options for the default HTML/plain-text renderer.
+ */
+export interface DefaultRendererOptions extends RendererOptions {}
 
 /**
  * Validates whether a string is a valid HTTP or HTTPS URL.

@@ -32,76 +32,65 @@ export interface EmailTemplateDto {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Parameters for creating an email verification message.
- */
-export interface EmailVerificationParams {
-  username: string;
-  verificationUrl: string;
-  otp: string;
+interface OptionalExtraFields {
   brandName?: string;
   extraMessage?: string;
   logoUrl?: string;
+  footer?: string;
+}
+
+/**
+ * Parameters for creating an email verification message.
+ */
+export interface EmailVerificationParams extends OptionalExtraFields {
+  username: string;
+  verificationUrl: string;
+  otp: string;
 }
 
 /**
  * Parameters for creating a password reset message.
  */
-export interface PasswordResetParams {
+export interface PasswordResetParams extends OptionalExtraFields {
   username: string;
   resetUrl: string;
   otp?: string;
-  brandName?: string;
-  extraMessage?: string;
-  logoUrl?: string;
 }
 
 /**
  * Parameters for creating a 2FA code message.
  */
-export interface TwoFactorParams {
+export interface TwoFactorParams extends OptionalExtraFields {
   username: string;
   otp: string;
   magicLink?: string;
-  brandName?: string;
-  extraMessage?: string;
-  logoUrl?: string;
 }
 
 /**
  * Parameters for creating a magic link sign-in message.
  */
-export interface MagicLinkParams {
+export interface MagicLinkParams extends OptionalExtraFields {
   username: string;
   magicLink: string;
-  brandName?: string;
-  extraMessage?: string;
-  logoUrl?: string;
 }
 
 /**
  * Parameters for creating a newsletter or announcement message.
  */
-export interface NewsletterParams {
+export interface NewsletterParams extends OptionalExtraFields {
   subject: string;
   header: string;
   body: string;
-  logoUrl?: string;
   imageUrl?: string;
   actionUrl?: string;
   actionText?: string;
-  brandName?: string;
-  footer?: string;
 }
 
 /**
  * Parameters for creating a simple notification message.
  */
-export interface SimpleMessageParams {
+export interface SimpleMessageParams extends OptionalExtraFields {
   subject: string;
   header: string;
   body: string;
-  brandName?: string;
-  footer?: string;
-  logoUrl?: string;
 }

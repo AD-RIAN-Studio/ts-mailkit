@@ -24,6 +24,12 @@ import type {
   CpaasTemplateSendPayload,
 } from "./types.js";
 
+/**
+ * Zoho CPaaS accepts at most 500 recipients per request, counted across
+ * `to`, `cc`, and `bcc`.
+ */
+const CPAAS_MAX_RECIPIENTS = 500;
+
 /** Fields shared by every CPaaS request payload. */
 interface CommonPayloadFields {
   cc?: CpaasRecipientWrapper[];
@@ -59,6 +65,9 @@ interface CommonOptions {
  * - `sendBulk` — batch raw email (`POST /v1.1/email/batch`)
  * - `sendKnownTemplate` — single template email (`POST /v1.1/email/template`)
  * - `sendBulkKnownTemplate` — batch template email (`POST /v1.1/email/template/batch`)
+ *
+ * Requests exceeding Zoho's 500-recipient limit (across `to`, `cc`, and `bcc`)
+ * are rejected before any network call is made.
  */
 export class CpaasHttpSender implements IEmailSender {
   readonly name = "cpaas";
@@ -139,7 +148,31 @@ export class CpaasHttpSender implements IEmailSender {
 
   // ─── Payload builders ──────────────────────────────────────────────────────
 
+  /**
+   * Guards against requests that exceed Zoho CPaaS's per-request recipient
+   * limit, counted across `to`, `cc`, and `bcc`.
+   */
+  private assertRecipientLimit(
+    to: Recipient | Recipient[],
+    cc?: Recipient | Recipient[],
+    bcc?: Recipient | Recipient[],
+  ): void {
+    const total =
+      normalizeRecipients(to).length +
+      normalizeRecipients(cc).length +
+      normalizeRecipients(bcc).length;
+
+    if (total > CPAAS_MAX_RECIPIENTS) {
+      throw new TransportError(
+        `CpaasHttpSender: Too many recipients (${total}). Zoho CPaaS accepts at most ${CPAAS_MAX_RECIPIENTS} recipients per request across to, cc, and bcc.`,
+        { transportName: this.name },
+      );
+    }
+  }
+
   private buildSendPayload(options: SendMailOptions): CpaasSendPayload {
+    this.assertRecipientLimit(options.to, options.cc, options.bcc);
+
     const toRecipients = normalizeRecipients(options.to);
     if (toRecipients.length === 0) {
       throw new TransportError("CpaasHttpSender: At least one recipient (to) must be specified.", {
@@ -167,6 +200,8 @@ export class CpaasHttpSender implements IEmailSender {
   }
 
   private buildTemplatePayload(options: KnownTemplateSendOptions): CpaasTemplateSendPayload {
+    this.assertRecipientLimit(options.to, options.cc, options.bcc);
+
     const toRecipients = normalizeRecipients(options.to);
     if (toRecipients.length === 0) {
       throw new TransportError("CpaasHttpSender: At least one recipient (to) must be specified.", {
@@ -198,6 +233,8 @@ export class CpaasHttpSender implements IEmailSender {
   private buildBatchTemplatePayload(
     options: BulkKnownTemplateSendOptions,
   ): CpaasBatchTemplateSendPayload {
+    this.assertRecipientLimit(options.to, options.cc, options.bcc);
+
     if (!options.to || options.to.length === 0) {
       throw new TransportError("CpaasHttpSender: At least one recipient (to) must be specified.", {
         transportName: this.name,

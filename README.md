@@ -10,7 +10,7 @@ Works seamlessly in **Node.js**, **Cloudflare Workers** (`workerd`), **Bun**, **
 
 - **Type-Safe DTOs**: Strongly-typed Data Transfer Objects for transactional emails (verification, password reset, 2FA, magic links, newsletters).
 - **Pluggable Transports (`IEmailSender`)**: Decoupled transport adapter interface with built-in senders:
-  - `CpaasHttpSender` (Zoho CPaaS transactional API via native `fetch`).
+  - `CpaasHttpSender` (Zoho CPaaS transactional API via native `fetch`; rejects requests over 500 recipients before dispatch).
   - `MemoryEmailSender` (In-memory mock transport for unit and integration testing).
   - `ConsoleEmailSender` (Formatted terminal logger for local development).
 - **Zero Runtime Dependencies**: Core uses standard web APIs (global `fetch`), ensuring zero heavy dependencies and complete edge compatibility.
@@ -289,6 +289,8 @@ await mailer.sendBulkKnownTemplate({
 ```
 
 Set `CpaasHttpConfig.preferTemplateAlias: true` to send `template_alias` instead of `template_key`. Every transport returns a unified `SendResult` whose `rawResponse` field holds the provider's raw response (typed via the exported `CpaasSuccessResponse` / `CpaasErrorResponse` types).
+
+> **Recipient limit:** Zoho CPaaS accepts at most **500 recipients per request**, counted across `to`, `cc`, and `bcc`. `CpaasHttpSender` validates this before making any network request and throws a `TransportError` when exceeded.
 
 ### 8. Building Upload-Ready Templates
 

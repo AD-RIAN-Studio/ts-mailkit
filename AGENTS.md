@@ -40,7 +40,7 @@ pnpm run check && pnpm run typecheck && pnpm test:unit && pnpm run build
 
 - `src/core/`: Domain models and option types (`types.ts`), error hierarchy (`errors.ts`), and client facade (`client.ts`). Shared option bases (`MailAddressOptions`, `MailMetadataOptions`, `TrackingOptions`) and bulk/template option types live in `types.ts`.
 - `src/transports/`: Pluggable senders implementing `IEmailSender`.
-  - `src/transports/cpaas/`: Zoho CPaaS (formerly ZeptoMail) HTTP adapter (`CpaasHttpSender`, uses global `fetch`).
+  - `src/transports/cpaas/`: Zoho CPaaS (formerly ZeptoMail) HTTP adapter (`CpaasHttpSender`, uses global `fetch`). Rejects requests over Zoho's 500-recipient limit (to + cc + bcc) before dispatch.
   - `src/transports/memory/`: In-memory transport for unit/integration tests.
   - `src/transports/console/`: Terminal logger transport for dev mode.
 - `src/templates/`: Strongly typed email DTO schemas (`dto/`) and `EmailTemplateFactory` (`factory.ts`).

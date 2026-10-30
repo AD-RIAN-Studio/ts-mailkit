@@ -280,4 +280,84 @@ describe("CpaasHttpSender", () => {
       expect(transportErr.rawResponse).toEqual(errorBody);
     }
   });
+
+  it("rejects more than 500 recipients across to, cc, and bcc before making a request", async () => {
+    const mockFetch = vi.fn();
+    const sender = new CpaasHttpSender({
+      apiToken: "token",
+      from: "from@domain.com",
+      fetch: mockFetch,
+    });
+
+    const makeRecipients = (count: number, prefix: string) =>
+      Array.from({ length: count }, (_, i) => `${prefix}${i}@example.com`);
+
+    try {
+      await sender.send({
+        to: makeRecipients(400, "to"),
+        cc: makeRecipients(60, "cc"),
+        bcc: makeRecipients(41, "bcc"),
+        subject: "Too many",
+        html: "<p>Too many</p>",
+      });
+      expect.fail("Expected TransportError to be thrown");
+    } catch (err) {
+      expect(err).toBeInstanceOf(TransportError);
+      expect((err as TransportError).message).toContain("500");
+    }
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("allows exactly 500 recipients", async () => {
+    const mockFetch = vi.fn().mockResolvedValue(mockResponse({ data: [{ message_id: "ok-500" }] }));
+    const sender = new CpaasHttpSender({
+      apiToken: "token",
+      from: "from@domain.com",
+      fetch: mockFetch,
+    });
+
+    const recipients = Array.from({ length: 500 }, (_, i) => `user${i}@example.com`);
+
+    const res = await sender.send({
+      to: recipients,
+      subject: "Exactly 500",
+      html: "<p>Exactly 500</p>",
+    });
+
+    expect(res.success).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("enforces the recipient limit on bulk and template sends", async () => {
+    const mockFetch = vi.fn();
+    const sender = new CpaasHttpSender({
+      apiToken: "token",
+      from: "from@domain.com",
+      fetch: mockFetch,
+    });
+
+    const tooMany = Array.from({ length: 501 }, (_, i) => `user${i}@example.com`);
+
+    await expect(sender.sendBulk({ to: tooMany, subject: "S", html: "<p>S</p>" })).rejects.toThrow(
+      TransportError,
+    );
+
+    await expect(
+      sender.sendKnownTemplate({
+        templateId: "t",
+        to: "user@example.com",
+        cc: tooMany,
+      }),
+    ).rejects.toThrow(TransportError);
+
+    await expect(
+      sender.sendBulkKnownTemplate({
+        templateId: "t",
+        to: tooMany.map((address) => ({ address })),
+      }),
+    ).rejects.toThrow(TransportError);
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
 });
